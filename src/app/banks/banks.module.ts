@@ -5,16 +5,20 @@ import { ListPageComponent } from './pages/list-page/list-page.component';
 import { LayoutPageComponent } from './pages/layout-page/layout-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
 import { BankPageComponent } from './pages/bank-page/bank-page.component';
+import { SharedModule } from '../shared/shared.module';
+import { TableBanksComponent } from './components/table-banks/table-banks.component';
 
 
 
 @NgModule({
   declarations: [
-    ListPageComponent, LayoutPageComponent, RegisterPageComponent, BankPageComponent
+    ListPageComponent, LayoutPageComponent, RegisterPageComponent, BankPageComponent, TableBanksComponent
   ],
   imports: [
     CommonModule,
-    BanksRoutingModule
+    BanksRoutingModule,
+    // SharedModule
+
   ]
 })
 export class BanksModule { }

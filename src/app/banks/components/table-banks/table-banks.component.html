@@ -1,0 +1,16 @@
+<table class="table border-radius">
+  <thead>
+    <tr>
+      <th>Codigo Banco</th>
+      <th>Nombre</th>
+      <th>Moneda</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let bank of banks">
+    <tr>
+      <th class="table-active" scope="row">{{bank.codigoBanco}}</th>
+      <td class="table-active" colspan="1">{{bank.nombre}}</td>
+      <td class="table-active">{{bank.moneda.nombre}}</td>
+    </tr>
+  </tbody>
+</table>

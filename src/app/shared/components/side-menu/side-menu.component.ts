@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
-import { SidebarItem } from '../../../shared/interfaces/sidebar-item.interface';
+import { SidebarItem } from '../../interfaces/sidebar-item.interface';
 
 @Component({
-  selector: 'app-layout-page',
-  templateUrl: './layout-page.component.html',
-  styles: `h1{ margin-bottom:1rem }`
+  selector: 'app-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrl: './side-menu.component.css'
 })
-export class LayoutPageComponent {
-  public TitlePage : String = 'Bancos';
-
+export class SideMenuComponent {
   public sidebarItems: SidebarItem[] = [
     {
       label: 'Bancos',
@@ -23,5 +21,4 @@ export class LayoutPageComponent {
       url:'/exchange-rate'
     },
   ]
-
 }

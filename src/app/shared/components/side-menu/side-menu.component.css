@@ -1,0 +1,29 @@
+
+.side-menu__title {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-side-menu);
+  min-height: 50px;
+  height: 10%;
+
+  color: var(--color-background);
+  border-radius: 0px 5px 0 0;
+
+}
+
+.side-menu__content {
+  background-color: var(--color-primary);
+  background-color: var(--color-side-menu);
+  height: 90%;
+  overflow-x: auto;
+  border-radius: 0px 0 5px 0;
+
+}
+.side-menu__item {
+  margin: 0;
+  padding: 1rem 0 0 0;
+}
+.side-menu__link {
+
+  text-decoration: none;
+}

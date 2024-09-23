@@ -1,0 +1,12 @@
+<!-- <nav> -->
+<section class="side-menu__title">
+  <h4 class="">Sistema Bancario</h4>
+</section>
+
+
+<ul class="side-menu__content">
+  <li class="side-menu__item" *ngFor=" let item of sidebarItems" [routerLink]="item.url">
+    <a class="side-menu__link">{{item.label}}</a>
+  </li>
+</ul>
+<!-- </nav> -->

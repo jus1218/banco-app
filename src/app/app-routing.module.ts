@@ -8,7 +8,6 @@ const routes: Routes = [
     redirectTo: 'banks',
     pathMatch: 'full'
   },
-
   {
     path: 'banks',
     loadChildren: () => import('./banks/banks.module').then((m) => m.BanksModule)

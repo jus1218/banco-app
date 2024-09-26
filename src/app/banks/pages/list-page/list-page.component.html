@@ -1,2 +1,29 @@
-<!-- <app-table></app-table> -->
+<form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off" class="row pb-4">
+
+  <section class="col">
+  </section>
+  <section class="col-sm-12 col-md-4">
+    <div class="input-group ">
+      <input type="text" formControlName="nombre" [value]="this.getNombre()" class="form-control input-search"
+        placeholder="Buscar por nombre" aria-describedby="addon-wrapping">
+    </div>
+  </section>
+  <section class="col d-flex justify-content-end">
+    <app-pagination (onDecreaseOffset)="decreaseOffset($event)" (onIncreaseOffset)="increaseOffset($event)"
+      [currentOffset]="this.paginationService.getOffset()" [canPagination]="this.canPagination()">
+    </app-pagination>
+  </section>
+</form>
 <bank-table-banks [banks]="banks"></bank-table-banks>
+
+<!--
+<code>
+  <pre>Es valido: {{ myForm.valid| json }}</pre>
+</code>
+<code>
+  <pre>Offset: {{ this.myForm.get('offset')?.value| json }}</pre>
+</code>
+<code>
+  <pre>Limit: {{ this.myForm.get('limit')?.value| json }}</pre>
+</code> -->
+<!-- formControlName="name" -->

@@ -13,6 +13,10 @@ const routes: Routes = [
     loadChildren: () => import('./banks/banks.module').then((m) => m.BanksModule)
   },
   {
+    path: 'clients',
+    loadChildren: () => import('./clients/clients.module').then(m => m.ClientsModule)
+  },
+  {
     path: '404',
     component: NotFoundPageComponent
   },

@@ -9,4 +9,7 @@ import { Bank } from '../../interfaces/bank.interface';
 export class TableBanksComponent {
   @Input()
   public banks!:Bank[];
+
+
+
 }

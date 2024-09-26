@@ -1,0 +1,22 @@
+<!-- pagination.component.html -->
+<nav aria-label="...">
+  <ul class="pagination">
+    <li class="page-item" *ngIf="currentOffset !== 0">
+      <span class="page-link btn" (click)="decrease()">Anterior</span>
+    </li>
+    <li class="page-item disabled" *ngIf="currentOffset === 0">
+      <span class="page-link btn">Anterior</span>
+    </li>
+
+    <li class="page-item active" aria-current="page">
+      <span class="page-link">{{ (currentOffset) + 1 }}</span>
+    </li>
+
+    <li class="page-item" *ngIf="canPagination">
+      <a class="page-link btn" (click)="increase()">Siguiente</a>
+    </li>
+    <li class="page-item disabled" *ngIf="!canPagination">
+      <a class="page-link btn">Siguiente</a>
+    </li>
+  </ul>
+</nav>

@@ -1,1 +1,45 @@
-<p>bank-page works!</p>
+<div class="row">
+
+  <div class="col">
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">Codigo: {{bank?.codigoBanco}}</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">Nombre: {{bank?.nombre}}</h6>
+
+        <h6 class="card-subtitle mb-2 text-body-secondary">Moneda base: {{moneda}}</h6>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">Telefonos</h5>
+        <section *ngFor="let telefono of telefonos">
+          <h6 class="card-subtitle mb-2 text-body-secondary">- {{telefono.numero}}</h6>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col">
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title ">Ubicación</h5>
+        <h6 class="card-subtitle mb-1 text-body-secondary">Provincia: </h6>
+        <p class="card-text mb-2"> {{provincia?.nombre}}</p>
+        <h6 class="card-subtitle mb-1 text-body-secondary">Canton:</h6>
+        <p class="card-text mb-2"> {{provincia?.canton?.nombre}}</p>
+        <h6 class="card-subtitle mb-1 text-body-secondary">Distrito:</h6>
+        <p class="card-text mb-2"> {{provincia?.canton?.distrito?.nombre}}</p>
+        <h6 class="card-subtitle mb-1 text-body-secondary">Dirección exacta:</h6>
+        <p class="card-text  "> {{bank?.direccionExacta}}</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+

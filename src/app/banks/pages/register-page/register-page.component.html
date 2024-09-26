@@ -1,1 +1,86 @@
-<p>register-page works!</p>
+<form class="row" [formGroup]="myForm" (ngSubmit)="onSubmit()" autocomplete="off">
+  <div class="col "></div>
+  <div class=" col-sm-12  col-md-4 border  rounded p-4">
+    <div class="row mb-2">
+
+      <h2>{{currentBank.codigoBanco ? 'Editar':'Agregar'}} Banco</h2>
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputEmail1" class="form-label">Codigo Banco</label>
+      <input type="text" formControlName="codigoBanco" class="form-control" id="exampleInputEmail1"
+        aria-describedby="emailHelp">
+      <span *ngIf="isValidField('codigoBanco')" class="form-text text-danger">
+        {{getFieldError("codigoBanco")}}
+      </span>
+      <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Nombre Banco</label>
+      <input type="text" formControlName="nombre" class="form-control" id="exampleInputPassword1">
+      <span *ngIf="isValidField('nombre')" class="form-text text-danger">
+        {{getFieldError("nombre")}}
+      </span>
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Direccion Exacta</label>
+      <input type="text" formControlName="direccionExacta" class="form-control" id="exampleInputPassword1">
+      <span *ngIf="isValidField('direccionExacta')" class="form-text text-danger">
+        {{getFieldError("direccionExacta")}}
+      </span>
+    </div>
+
+    <div class="mb-3">
+      <select formControlName="provincia" class="form-select" aria-label="Default select example">
+        <option selected value=0 class="text-center">-- Seleccione una Provincia --</option>
+        <option *ngFor="let provincia of provincias" [value]=provincia.codigoProvincia>
+          {{provincia.nombre}}
+        </option>
+      </select>
+      <span *ngIf="isValidField('provincia')" class="form-text text-danger">
+        {{getFieldError("provincia")}}
+      </span>
+    </div>
+
+
+
+    <div class="mb-3">
+      <select formControlName="canton" class="form-select" aria-label="Default select example">
+        <option selected value=0 class="text-center">-- Seleccione un Canton --</option>
+        <option *ngFor="let canton of cantonesByProvincia" [value]=canton.codigoCanton>
+          {{canton.nombre}}
+        </option>
+      </select>
+      <span *ngIf="isValidField('canton')" class="form-text text-danger">
+        {{getFieldError("canton")}}
+      </span>
+    </div>
+
+    <div class="mb-3">
+      <select formControlName="distrito" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value=0>-- Seleccione un Distrito --</option>
+        <option *ngFor="let distrito of distritosByCanton" [value]=distrito.codigoDistrito>
+          {{distrito.nombre}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('distrito')" class="form-text text-danger">
+        {{getFieldError("distrito")}}
+      </span>
+    </div>
+    <div class="row justify-content-center ">
+      <button type="submit" class="btn btn-primary text-center">Crear</button>
+    </div>
+  </div>
+
+
+
+  <div class="col">
+    <h3>Vista Previa</h3>
+    <code>
+      <pre>Es valido: {{ myForm.valid| json }}</pre>
+    </code>
+    <code>
+      <pre>Datos: {{ myForm.value| json }}</pre>
+    </code>
+  </div>
+</form>

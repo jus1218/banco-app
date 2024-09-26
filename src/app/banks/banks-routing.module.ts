@@ -16,7 +16,7 @@ const routes: Routes = [
       { path: 'register' ,component: RegisterPageComponent },
       { path: 'edit/:id', component: RegisterPageComponent },
       {//Debe ir de ultimo sino todas coinciden con el
-        path: ':id',  component: BankPageComponent
+        path: ':id/:moneda',  component: BankPageComponent
       },
       {
         path:'**',

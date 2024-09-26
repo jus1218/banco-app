@@ -7,6 +7,7 @@ import { RegisterPageComponent } from './pages/register-page/register-page.compo
 import { BankPageComponent } from './pages/bank-page/bank-page.component';
 import { SharedModule } from '../shared/shared.module';
 import { TableBanksComponent } from './components/table-banks/table-banks.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -17,7 +18,8 @@ import { TableBanksComponent } from './components/table-banks/table-banks.compon
   imports: [
     CommonModule,
     BanksRoutingModule,
-    // SharedModule
+    SharedModule,
+    ReactiveFormsModule
 
   ]
 })

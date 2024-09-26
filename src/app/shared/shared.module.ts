@@ -4,6 +4,9 @@ import { NotFoundPageComponent } from './pages/not-found-page/not-found-page.com
 import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { BanksRoutingModule } from '../banks/banks-routing.module';
 import { TableComponent } from './components/table/table.component';
+import { InputComponent } from './components/input/input/input.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -11,11 +14,20 @@ import { TableComponent } from './components/table/table.component';
   declarations: [
     NotFoundPageComponent,
     SideMenuComponent,
-    TableComponent
+    TableComponent,
+    InputComponent,
+    PaginationComponent
   ],
   imports: [
-    CommonModule,BanksRoutingModule
+    CommonModule,
+    BanksRoutingModule,
+    HttpClientModule
   ],
-  exports: [NotFoundPageComponent, SideMenuComponent,TableComponent]
+  exports: [
+    NotFoundPageComponent,
+    SideMenuComponent,
+    TableComponent,
+    InputComponent,
+    PaginationComponent]
 })
 export class SharedModule { }

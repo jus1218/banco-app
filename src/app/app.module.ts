@@ -5,16 +5,18 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { HttpClientModule } from '@angular/common/http';
+import { CurrencyFormatPipe } from './shared/pipe/currency-format.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    SharedModule // Es el unico modulo importado
+    SharedModule, // Es el unico modulo importado
+
   ],
   providers: [],
   bootstrap: [AppComponent]

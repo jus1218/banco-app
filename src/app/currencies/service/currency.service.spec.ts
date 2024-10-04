@@ -1,14 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { UbicationService } from './ubication.service';
 
+import { CurrencyService } from './currency.service';
 
-
-describe('UbicationService', () => {
-  let service: UbicationService;
+describe('CurrencyService', () => {
+  let service: CurrencyService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(UbicationService);
+    service = TestBed.inject(CurrencyService);
   });
 
   it('should be created', () => {

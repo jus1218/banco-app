@@ -1,0 +1,68 @@
+<form [formGroup]="PaginationForm" autocomplete="off" class="row pb-4">
+  <!-- [formGroup]="myForm" -->
+  <section class="col">
+    <button class="btn btn-success" [routerLink]="['/currencies/register' ]">Crear Moneda</button>
+  </section>
+  <section class="col-sm-12 col-md-4">
+    <div class="input-group ">
+      <input type="text" (keydown.enter)="onSearch($event)" formControlName="codigoBanco"
+        class="form-control input-search" placeholder="Buscar por nombre" aria-describedby="addon-wrapping">
+    </div>
+  </section>
+  <!-- [value]="this.paginationService.getPalabra()"  -->
+  <section class="col d-flex justify-content-end">
+    <app-pagination (onDecreaseOffset)="decreaseOffset($event)" (onIncreaseOffset)="increaseOffset($event)"
+      [currentOffset]="paginationService.getOffsett()" [canPagination]="canPagination">
+    </app-pagination>
+  </section>
+</form>
+<!-- <div class="col d-flex justify-content-center aling-items-center"> -->
+<table class="table rounded  ">
+  <thead>
+    <tr>
+      <th>Codigo Moneda</th>
+      <th>Nombre</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let currency of currrencies">
+    <tr>
+      <th class="table-active" scope="row">{{currency.codigoMoneda}}</th>
+      <td class="table-active" colspan="1">{{currency.nombre}}</td>
+
+      <!-- <td class="table-active">{{client.telefono}}</td> -->
+
+      <td class="table-active">
+        <button [routerLink]="['/currencies', currency.codigoMoneda]" type="button"
+          class="btn btn-primary me-1">Ver</button>
+        <button [routerLink]="['/currencies/edit/', currency.codigoMoneda]" type="button"
+          class="btn btn-warning me-1">Editar</button>
+      </td>
+    </tr>
+  </tbody>
+  <tbody *ngIf="currrencies.length===0 && !isLoading" class="bg-warning  ">
+    <tr>
+      <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
+
+    </tr>
+  </tbody>
+</table>
+<!-- </div> -->
+
+
+<app-loading-spinner *ngIf="isLoading" [title]="'Clientes'"></app-loading-spinner>
+
+<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
+  class="alert text-center w-50 animated-box postion-message" role="alert">
+  {{message.message}}
+</div>
+
+<div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
+  <h3>Vista Previa</h3>
+  <code>
+      <pre>Es valido: {{ PaginationForm.valid| json }}</pre>
+    </code>
+  <code>
+      <pre>Datos: {{ PaginationForm.value| json }}</pre>
+    </code>
+</div>

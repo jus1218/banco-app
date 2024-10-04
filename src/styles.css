@@ -11,6 +11,11 @@
   --color-warning: #ffc107;
 }
 
+.c-caja{
+
+  background-color: var(#3f1717);
+}
+
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
@@ -27,6 +32,16 @@ body {
 }
 
 
+.postion-message{
+  position: fixed ;
+  top: 50vh;
+  right:  25vw;
+
+  z-index: 999;
+  /* top: 2vh;
+  right:  2vw; */
+
+}
 
 
 h1 {
@@ -83,11 +98,12 @@ p{
 .side-menu {
   /* flex: 0 0 100px; */
   display: flex;
-  width: 150px;
+  width: 220px;
   flex-direction: column;
   background-color: var(--color-side-menu);
   border-radius: 0 5px 5px 0;
-  padding: 1rem 0 0 1rem;
+  padding: 1rem 0.5rem 0 0.5rem;
+
 
 
 }
@@ -142,3 +158,4 @@ p{
 .input-search{
   text-align: center;
 }
+

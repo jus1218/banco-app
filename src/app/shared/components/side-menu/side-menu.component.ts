@@ -10,15 +10,20 @@ export class SideMenuComponent {
   public sidebarItems: SidebarItem[] = [
     {
       label: 'Bancos',
-      url:'/banks'
+      url: '/banks'
     },
     {
       label: 'Clientes',
-      url:'/clients'
+      url: '/clients'
     },
     {
-      label: 'Tipo Cambio',
-      url:'/exchange-rate'
+      label: 'Monedas',
+      url: '/currencies'
     },
+    {
+      label: 'Tipos de Cambio',
+      url: '/exchange-rates'
+    },
+
   ]
 }

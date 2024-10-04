@@ -1,20 +1,23 @@
-<form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off" class="row pb-4">
+<form [formGroup]="myForm" autocomplete="off" class="row pb-4">
 
   <section class="col">
+    <button class="btn btn-success" [routerLink]="['/banks/register' ]">Crear Banco</button>
   </section>
   <section class="col-sm-12 col-md-4">
     <div class="input-group ">
-      <input type="text" formControlName="nombre" [value]="this.getNombre()" class="form-control input-search"
+      <input type="text" (keydown.enter)="onSearch($event)" formControlName="nombre" class="form-control input-search"
         placeholder="Buscar por nombre" aria-describedby="addon-wrapping">
     </div>
   </section>
   <section class="col d-flex justify-content-end">
     <app-pagination (onDecreaseOffset)="decreaseOffset($event)" (onIncreaseOffset)="increaseOffset($event)"
-      [currentOffset]="this.paginationService.getOffset()" [canPagination]="this.canPagination()">
+      [currentOffset]="this.paginationService.getOffsett()" [canPagination]="canPagination">
     </app-pagination>
   </section>
 </form>
 <bank-table-banks [banks]="banks"></bank-table-banks>
+
+<app-loading-spinner *ngIf="isLoading" [title]="'Bancos'"></app-loading-spinner>
 
 <!--
 <code>

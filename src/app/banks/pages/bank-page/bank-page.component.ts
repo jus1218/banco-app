@@ -3,9 +3,9 @@ import { BankInfo } from '../../interfaces/bankinfo.interface';
 import { BanksService } from '../../services/banks.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { Distrito, Telefono } from '../../interfaces/bank.interface';
-import { UbicationService } from '../../../shared/service/ubication/ubication.service';
-import { Provincia, Provincia2 } from '../../../shared/interfaces/provincia.interface';
+import { UbicationService } from '../../../shared/service/ubication.service';
+import { Telefono } from '../../interfaces/bank.interface';
+import { Provincia2 } from '../../../shared/interfaces/provincia.interface';
 
 @Component({
   selector: 'app-bank-page',
@@ -15,7 +15,7 @@ import { Provincia, Provincia2 } from '../../../shared/interfaces/provincia.inte
 export class BankPageComponent implements OnInit {
   public bank?: BankInfo;
   public telefonos?: Telefono[];
-  public provincia?:Provincia2 | undefined;
+  public provincia?: Provincia2 | undefined;
   public moneda?: string;
 
   constructor(
@@ -34,15 +34,15 @@ export class BankPageComponent implements OnInit {
           return this.banksService.getBanco(id);
         }),
         switchMap((bank) => {
-          if (!bank) return this.router.navigate(['/bancos/list']);
+          if (!bank) return this.router.navigate(['/banks/list']);
           this.bank = bank;
-           this.provincia = this.ubicationService.getProvinciaCantonbyIdDistrito(bank.codigoDistrito);
+          this.provincia = this.ubicationService.getProvinciaCantonbyIdDistrito(bank.codigoDistrito);
           return this.banksService.getPhonesByCodeBank(bank.codigoBanco)
         })
       )
-      .subscribe(telefonos => {
-        if (!telefonos) return this.router.navigate(['/bancos/list']);
-        this.telefonos = telefonos as Telefono[];
+      .subscribe(res => {
+        // if (!telefonos) return this.router.navigate(['/bancos/list']);
+        // this.telefonos = res.;
         return;
       })
   }

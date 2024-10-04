@@ -21,3 +21,18 @@ export interface Telefono {
   codigoTelefono: number;
   numero: string;
 }
+export interface TelefonoCreateUpdate {
+
+  numero: string;
+  codigoCliente: String | null;
+  codigoBanco: String | null;
+}
+
+
+export interface BankCreateUpdate {
+  codigoBanco: String;
+  nombre: String;
+  codigoMoneda: number;
+  codigoDistrito: number;
+  direccionExacta: String;
+}

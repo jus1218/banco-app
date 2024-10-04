@@ -1,0 +1,19 @@
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+
+  top: 50vh;
+  left: 45vw;
+  /* background-color: rgba(0, 0, 0, 0.582); */
+  /* color: white; */
+  /* padding: 20px 40px; */
+  border-radius: 20px;
+  font-size: large;
+  font-size: 2rem;
+}
+
+
+

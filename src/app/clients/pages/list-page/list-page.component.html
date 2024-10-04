@@ -1,0 +1,72 @@
+<form [formGroup]="PaginationForm" autocomplete="off" class="row pb-4">
+  <!-- [formGroup]="myForm" -->
+  <section class="col">
+    <button class="btn btn-success" [routerLink]="['/clients/register' ]">Crear Cliente</button>
+  </section>
+  <section class="col-sm-12 col-md-4">
+    <div class="input-group ">
+      <input type="text" (keydown.enter)="onSearch($event)" formControlName="nombreCliente"
+        class="form-control input-search" placeholder="Buscar por nombre" aria-describedby="addon-wrapping">
+    </div>
+  </section>
+  <!-- [value]="this.paginationService.getPalabra()"  -->
+  <section class="col d-flex justify-content-end">
+    <app-pagination (onDecreaseOffset)="decreaseOffset($event)" (onIncreaseOffset)="increaseOffset($event)"
+      [currentOffset]="getOffset()" [canPagination]="canPagination">
+    </app-pagination>
+  </section>
+</form>
+<table class="table rounded">
+  <thead>
+    <tr>
+      <th>Codigo Cliente</th>
+      <th>Nombre</th>
+      <th>Primer Apellido</th>
+      <th>Segundo Apellido</th>
+      <th>Cedula</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let client of clients">
+    <tr>
+      <th class="table-active" scope="row">{{client.codigoCliente}}</th>
+      <td class="table-active" colspan="1">{{client.nombre}}</td>
+      <td class="table-active">{{client.primerApellido}}</td>
+      <td class="table-active">{{client.segundoApellido}}</td>
+      <td class="table-active">{{client.cedula}}</td>
+
+      <!-- <td class="table-active">{{client.telefono}}</td> -->
+
+      <td class="table-active">
+        <button [routerLink]="['/clients', client.codigoCliente]" type="button"
+          class="btn btn-primary me-1">Ver</button>
+        <button [routerLink]="['/clients/edit/', client.codigoCliente]" type="button"
+          class="btn btn-warning me-1">Editar</button>
+      </td>
+    </tr>
+  </tbody>
+  <tbody *ngIf="clients.length===0 && !isLoading" class="bg-warning  ">
+    <tr>
+      <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<app-loading-spinner *ngIf="isLoading" [title]="'Clientes'"></app-loading-spinner>
+
+<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
+  class="alert text-center w-50 animated-box postion-message" role="alert">
+  {{message.message}}
+</div>
+
+<div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
+  <h3>Vista Previa</h3>
+  <code>
+      <pre>Es valido: {{ PaginationForm.valid| json }}</pre>
+    </code>
+  <code>
+      <pre>Datos: {{ PaginationForm.value| json }}</pre>
+    </code>
+</div>

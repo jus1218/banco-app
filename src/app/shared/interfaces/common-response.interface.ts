@@ -4,7 +4,7 @@ export interface CommonResponse<T> {
   success: boolean;
 }
 export interface CommonResponseV<T> {
-  value: T;
+  value: T | null;
   message: string;
   success: boolean;
 }

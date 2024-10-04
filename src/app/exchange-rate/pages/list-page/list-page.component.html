@@ -1,0 +1,160 @@
+<app-loading-spinner *ngIf="isLoading" [title]="'Tipos de cambios'"></app-loading-spinner>
+
+<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
+  class="alert text-center w-50 animated-box postion-message" role="alert">
+  {{message.message}}
+</div>
+
+
+
+<form [formGroup]="PaginationForm" autocomplete="off" class="col  ">
+
+  <section class="row justify-content-center ">
+    <div class="col-100 col-sm-100 col-md-6 col-lg-4 col-xl-3 col-xxl-2"><button class="btn btn-success w-100 "
+        [routerLink]="['/exchange-rates/register' ]">Crear tipo de cambio</button></div>
+  </section>
+
+
+  <section class="row justify-content-center  pt-4">
+
+    <div class="col-sm-12 col-md-10 col-lg-6  border  rounded p-4">
+      <h4>Filtros</h4>
+
+      <div class="row">
+        <!-- BANCO -->
+        <div class="col-sm-12 col-md-4">
+          <div class="mb-3">
+            <label class="form-label">Banco</label>
+            <select formControlName="codigoBanco" class="form-select" aria-label="Default select example">
+              <option selected class="text-center" value="">-- Seleccione un Banco --</option>
+              <option *ngFor="let bank of banks" [value]=bank.codigoBanco>
+                {{bank.nombre}}
+              </option>
+            </select>
+
+            <!-- <span *ngIf="isValidField('codigoDistrito')" class="form-text text-danger">
+            {{getFieldOfGroupError("codigoDistrito")}}
+          </span> -->
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-4">
+          <div class="mb-3">
+            <label class="form-label">Moneda</label>
+            <select formControlName="codigoMoneda" class="form-select" aria-label="Default select example">
+              <option selected class="text-center" value="">-- Seleccione una Moneda --</option>
+              <option *ngFor="let currency of currencies" [value]=currency.codigoMoneda>
+                {{currency.nombre}}
+              </option>
+            </select>
+
+            <!-- <span *ngIf="isValidField('codigoDistrito')" class="form-text text-danger">
+            {{getFieldOfGroupError("codigoDistrito")}}
+          </span> -->
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-4">
+          <div class="mb-3">
+            <label class="form-label">Fecha</label>
+            <input type="datetime-local" class="form-select" formControlName="fecha" />
+
+            <!-- <span *ngIf="isValidField('codigoDistrito')" class="form-text text-danger">
+            {{getFieldOfGroupError("codigoDistrito")}}
+          </span> -->
+          </div>
+        </div>
+
+      </div>
+      <div class="row  justify-content-center">
+        <div class="col-12 col-md-6   col-lg-4 ">
+          <button class="btn btn-outline-primary  w-100 " (click)="filter()">Filtrar</button>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+</form>
+<section class="row  ">
+  <nav class="d-flex justify-content-center p-4" aria-label="...">
+    <ul class="pagination">
+      <li class="page-item" *ngIf="currentPagination.offset>0">
+        <span class="page-link btn" (click)="decrease()">Anterior</span>
+      </li>
+      <li class="page-item disabled" *ngIf="currentPagination.offset===0">
+        <span class="page-link btn">Anterior</span>
+      </li>
+
+      <li class="page-item active" aria-current="page">
+        <span class="page-link">{{ currentPagination.offset + 1 }}</span>
+      </li>
+
+      <li class="page-item" *ngIf="canPagination">
+        <a class="page-link btn" (click)="increase()">Siguiente</a>
+      </li>
+      <li class="page-item disabled" *ngIf="!canPagination">
+        <a class="page-link btn">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
+
+</section>
+<table class="table rounded  ">
+  <thead>
+    <tr>
+      <th>Codigo Moneda</th>
+      <th>Codigo Banco</th>
+      <th>Fecha</th>
+      <th>Tipo Cambio Compra</th>
+      <th>Tipo Cambio Venta</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let currency of exchangeRates">
+    <tr>
+      <th class="table-active" scope="row">{{currency.codigoMoneda}}</th>
+      <td class="table-active" colspan="1">{{currency.codigoBanco}}</td>
+      <td class="table-active" colspan="1">{{currency.fecha.toString() | dateFormart}}</td>
+      <td class="table-active" colspan="1">{{currency.tipoCambioCompra | currencyFormat: currency.codigoMoneda}}</td>
+      <td class="table-active" colspan="1">{{currency.tipoCambioVenta | currencyFormat: currency.codigoMoneda}}</td>
+
+      <!-- <td class="table-active">{{client.telefono}}</td> -->
+
+      <td class="table-active">
+        <!-- <button [routerLink]="['/exchange-rates', [ currency.codigoMoneda,currency.fecha,currency.codigoBanco]]" type="button"
+          class="btn btn-primary me-1">Ver</button> -->
+          <button [routerLink]="['/exchange-rates', currency.codigoMoneda, currency.fecha, currency.codigoBanco]" type="button" class="btn btn-primary me-1">Ver</button>
+          <button [routerLink]="['/exchange-rates/edit/', currency.codigoMoneda, currency.fecha, currency.codigoBanco]" type="button" class="btn  btn-warning me-1">Editar</button>
+
+        <!-- <button [routerLink]="['',[ currency.codigoMoneda,currency.fecha,currency.codigoBanco]]"
+          type="button" class="btn btn-warning me-1">Editar</button> -->
+<!-- (click)="setDelete(currency)" data-bs-toggle="modal" data-bs-target="#exampleModal"-->
+
+        <button type="button" class="btn btn-danger" (click)="deleteExchangeRate(currency)">
+          Eliminar
+        </button>
+
+      </td>
+    </tr>
+  </tbody>
+  <tbody *ngIf="exchangeRates.length===0 && !isLoading" class="bg-warning  ">
+    <tr>
+      <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
+  <h3>Vista Previa</h3>
+  <code>
+      <pre>Es valido: {{ PaginationForm.valid| json }}</pre>
+    </code>
+  <code>
+      <pre>Datos: {{ PaginationForm.value| json }}</pre>
+    </code>
+</div>
+<app-alert-dialog title="Eliminar tipo de cambio" description="¿Estas seguro que deseas eliminar este tipo de cambio?"
+  action="DELETE"></app-alert-dialog>
+<!-- Button trigger modal -->

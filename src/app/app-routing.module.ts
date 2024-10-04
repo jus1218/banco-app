@@ -17,6 +17,14 @@ const routes: Routes = [
     loadChildren: () => import('./clients/clients.module').then(m => m.ClientsModule)
   },
   {
+    path: 'currencies',
+    loadChildren: () => import('./currencies/currencies.module').then(m => m.currenciesModule)
+  },
+  {
+    path: 'exchange-rates',
+    loadChildren: () => import('./exchange-rate/exchange-rate.module').then(m => m.ExchangeRateModule)
+  },
+  {
     path: '404',
     component: NotFoundPageComponent
   },

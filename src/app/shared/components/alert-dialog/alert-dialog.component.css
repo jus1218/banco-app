@@ -1,0 +1,20 @@
+.alert-dialog-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(
+    -50%,
+    -50%
+  ); /* Mueve el contenedor hacia arriba y hacia la izquierda */
+  border-radius: 10px;
+  font-size: 2rem;
+  width: 30rem;
+  height: 20rem;
+  background-color: #333;
+  z-index: 999;
+  color: aliceblue;
+}

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, tap } from 'rxjs';
-import { Canton, Distrito, Provincia, Provincia2 } from '../../interfaces/provincia.interface';
-import { environments } from '../../../../environments/environments';
-import { CommonResponse } from '../../interfaces/common-response.interface';
+import { Canton, Distrito, Provincia, Provincia2 } from '../interfaces/provincia.interface';
+import { environments } from '../../../environments/environments';
+import { CommonResponse } from '../interfaces/common-response.interface';
+
 
 @Injectable({
   providedIn: 'root'

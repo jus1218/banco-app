@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormControl, ValidationErrors, FormGroup, AbstractControl, FormArray } from '@angular/forms';
+import { FormControl, ValidationErrors, FormGroup, AbstractControl, FormArray, Validators } from '@angular/forms';
 
 @Injectable({ providedIn: 'root' })
 export class ValidatorsService {
@@ -24,10 +24,22 @@ export class ValidatorsService {
   public isValidField(form: FormGroup, field: string) {
     return form.controls[field].errors && form.controls[field].touched;
   }
+  public isValidFormControl(form: FormControl) {
+    return form.errors && form.touched;
+  }
 
-  isValidFieldInArray( formArray: FormArray, index: number ) {
+  isValidFieldInArray(formArray: FormArray, index: number) {
     return formArray.controls[index].errors
-        && formArray.controls[index].touched;
+      && formArray.controls[index].touched;
+  }
+
+  istouchedField(form: FormGroup, field: string): boolean {
+
+    return form.controls[field].touched;
+  }
+  istouchedFieldInArray(formArray: FormArray, index: number): boolean {
+
+    return formArray.controls[index].touched;
   }
 
 
@@ -49,7 +61,10 @@ export class ValidatorsService {
 
   }
 
+  public phoneIsValid = [Validators.required, Validators.pattern(/^[0-9]*$/), Validators.minLength(8), Validators.maxLength(15)];
+  public cedulaIsValid = [Validators.required, Validators.pattern(/^[1-9][0-9]*$/) , Validators.min(1), Validators.maxLength(9)];
 
+  public mountIsValid = [Validators.required, Validators.pattern('^\\d+(\\.\\d{1,2})?$')];
 
 
 

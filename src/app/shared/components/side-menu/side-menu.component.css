@@ -1,14 +1,13 @@
-
 .side-menu__title {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  /* align-items: center; */
   background-color: var(--color-side-menu);
   min-height: 50px;
   height: 10%;
 
   color: var(--color-background);
   border-radius: 0px 5px 0 0;
-
 }
 
 .side-menu__content {
@@ -17,13 +16,29 @@
   height: 90%;
   overflow-x: auto;
   border-radius: 0px 0 5px 0;
-
 }
 .side-menu__item {
+  display: flex;
+  /* justify-content: space-between; */
+  justify-content: center;
+  align-items: center;
   margin: 0;
-  padding: 1rem 0 0 0;
+  padding: 1rem 0 1rem 0;
+  cursor: pointer;
+  margin: 5px 0px;
+}
+
+.side-menu__item:hover {
+  background-color:#919191c7;
+
+  border-radius: 10px;
 }
 .side-menu__link {
-
   text-decoration: none;
+}
+.active {
+  font-weight: bold;
+
+  background-color: var(--color-secondary);
+  border-radius: 10px;
 }

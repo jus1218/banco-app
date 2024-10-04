@@ -7,6 +7,10 @@ import { TableComponent } from './components/table/table.component';
 import { InputComponent } from './components/input/input/input.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { HttpClientModule } from '@angular/common/http';
+import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
+import { CurrencyFormatPipe } from './pipe/currency-format.pipe';
+import { DateFormartPipe } from './pipe/date-formart.pipe';
+import { AlertDialogComponent } from './components/alert-dialog/alert-dialog.component';
 
 
 
@@ -16,7 +20,11 @@ import { HttpClientModule } from '@angular/common/http';
     SideMenuComponent,
     TableComponent,
     InputComponent,
-    PaginationComponent
+    PaginationComponent,
+    LoadingSpinnerComponent,
+    CurrencyFormatPipe,
+    DateFormartPipe,
+    AlertDialogComponent
   ],
   imports: [
     CommonModule,
@@ -28,6 +36,11 @@ import { HttpClientModule } from '@angular/common/http';
     SideMenuComponent,
     TableComponent,
     InputComponent,
-    PaginationComponent]
+    PaginationComponent,
+    LoadingSpinnerComponent,
+    CurrencyFormatPipe,
+    DateFormartPipe,
+    AlertDialogComponent
+  ]
 })
 export class SharedModule { }

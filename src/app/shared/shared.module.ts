@@ -11,6 +11,8 @@ import { LoadingSpinnerComponent } from './components/loading-spinner/loading-sp
 import { CurrencyFormatPipe } from './pipe/currency-format.pipe';
 import { DateFormartPipe } from './pipe/date-formart.pipe';
 import { AlertDialogComponent } from './components/alert-dialog/alert-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { FormComponent } from '../client-account/components/form/form.component';
 
 
 
@@ -25,6 +27,7 @@ import { AlertDialogComponent } from './components/alert-dialog/alert-dialog.com
     CurrencyFormatPipe,
     DateFormartPipe,
     AlertDialogComponent
+
   ],
   imports: [
     CommonModule,
@@ -41,6 +44,7 @@ import { AlertDialogComponent } from './components/alert-dialog/alert-dialog.com
     CurrencyFormatPipe,
     DateFormartPipe,
     AlertDialogComponent
+
   ]
 })
 export class SharedModule { }

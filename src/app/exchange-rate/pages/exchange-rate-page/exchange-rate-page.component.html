@@ -1,4 +1,4 @@
-<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
+<div *ngIf="!!message" [ngClass]="message.success? 'alert-success ': 'alert-danger'"
   class="alert text-center w-50 animated-box postion-message" role="alert">
   {{message.message}}
 </div>
@@ -11,7 +11,7 @@
     <!-- TITULO -->
     <div class="row mb-2">
 
-      <h2 class="text-center">{{title}} Tipo Cambio</h2>
+      <h2 class="text-center">{{title}} <span class="fw-light"> Tipo Cambio</span></h2>
     </div>
 
 
@@ -78,42 +78,17 @@
 
 
     <div class="row">
-      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
-        class="btn btn-primary text-center">{{title}}</button>
+      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()" class="btn btn-primary text-center">
+        <img [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
     </div>
   </section>
 </form>
 
 
 <!-- <code>
-  <pre>Formulario Tipo Cambio: {{ currencyForm.value| json }}</pre>
-</code> -->
-<code>
   <pre>current Tipo Cambio: {{currentTipoCambio| json }}</pre>
 </code>
 <code>
   <pre>Formulario Tipo Cambio: {{exchangeRateForm.value| json }}</pre>
-</code>
-
-
-<!-- <h3>Vista Previa</h3>
-
-<code>
-      <pre>Todos validos: {{ currencyForm.valid| json }}</pre>
-  </code>
-
-<code>
-      <pre>Todos tocados: {{ currencyForm.touched | json }}</pre>
-  </code>
-
-<code>
-      <pre>Formulario Cliente: {{ currencyForm.value| json }}</pre>
-    </code>
-
-<code>
-      <pre>Nuevo Telefono: {{ currencyForm.value| json }}</pre>
-  </code>
-
-<code>
-      <pre>Cliente: {{ currencyForm| json }}</pre>
-  </code> -->
+</code> -->

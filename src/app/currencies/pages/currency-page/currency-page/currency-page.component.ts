@@ -19,19 +19,12 @@ import { TitlePage } from '../../../../shared/interfaces/title-page.interface';
   templateUrl: './currency-page.component.html',
   styleUrl: './currency-page.component.css'
 })
-export class CurrencyPageComponent implements OnInit, OnDestroy {
+export class CurrencyPageComponent implements OnInit {
   // Variables visuales y condicionales
   public title: TitlePage = 'Información';
   public isLoading: boolean = false;
   public message: Message | null = null;
-  //Ruta
-  public rutaActual: Ruta = {
-    modulo: 'currencies',
-    seccion: 'view'
-  }
 
-  //Arreglos
-  // public banks: Bank[] = []
 
   //Formularios
   public currencyForm!: FormGroup;
@@ -41,17 +34,14 @@ export class CurrencyPageComponent implements OnInit, OnDestroy {
     private validatorsService: ValidatorsService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private routerService: RouterService,
-    private messageManagerService: MessageManagerService,
+    private sms: MessageManagerService,
     private currencyService: CurrencyService
   ) {
 
     this.initValues();
 
   }
-  ngOnDestroy(): void {
-    this.routerService.ultimaRuta = this.rutaActual;
-  }
+
   ngOnInit(): void {
 
 
@@ -76,12 +66,6 @@ export class CurrencyPageComponent implements OnInit, OnDestroy {
       codigoMoneda: ['', [Validators.required, Validators.maxLength(3)]],
       nombre: ['', [Validators.required, Validators.maxLength(20)]],
     });
-  }
-  showMessage(message: Message) {
-    this.message = message;
-    setTimeout(() => {
-      this.message = null
-    }, 4000);
   }
 
   cargarDatos(): void {
@@ -108,22 +92,19 @@ export class CurrencyPageComponent implements OnInit, OnDestroy {
     if (this.title === "Editar") {
 
       this.currencyService.updateCurrency(this.currentCurrency)
-        .subscribe(res => {
-          this.showMessage({ message: res.message, isSuccess: res.success });
-
-          this.currencyForm.reset();
-          return;
-        });
-
-
+        .subscribe(({ message, success: isSuccess }) => this.sms.simpleBox({ message, success: isSuccess }));
+      return;
     }
 
     // AGREGAR
     this.currencyService.createCurrency(this.currentCurrency)
-      .subscribe(res => {
-        this.showMessage({ message: res.message, isSuccess: res.success });
+      .subscribe(({ message, success: isSuccess, value }) => {
+        this.sms.simpleBox({ message, success: isSuccess })
 
-        this.currencyForm.reset();
+        this.currencyForm.reset({
+          codigoMoneda: "",
+          nombre: ""
+        });
         return;
       });
 
@@ -136,12 +117,17 @@ export class CurrencyPageComponent implements OnInit, OnDestroy {
   }
 
   getFieldOfGroupError(field: string) {
-    return this.messageManagerService.getFieldOfGroupError(field, this.currencyForm);;
+    return this.sms.getFieldOfGroupError(field, this.currencyForm);
   }
 
 
   get currentCurrency(): Currency {
-    return this.currencyForm.value as Currency;
+    const form = this.currencyForm;
+    return {
+      ...form.value,
+      codigoMoneda: form.get('codigoMoneda')?.value
+
+    }
   }
 
 

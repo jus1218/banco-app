@@ -1,20 +1,16 @@
-<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
-  class="alert text-center w-50 animated-box postion-message" role="alert">
-  {{message.message}}
-</div>
 <app-loading-spinner *ngIf="isLoading" [title]="'Moneda'"></app-loading-spinner>
 
-<form class="row p-3  justify-content-center" [formGroup]="currencyForm" autocomplete="off">
-  <section class=" col-sm-12  col-md-4 border mt-0 mt-sm-2  rounded p-4 c-caja">
-    <!-- TITULO -->
-    <div class="row mb-2">
 
-      <h2 class="text-center">{{title}} Moneda</h2>
+<form class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-2 p-3  justify-content-center"
+  [formGroup]="currencyForm" autocomplete="off">
+
+
+  <div class="col  border rounded mt-0 mt-sm-2   p-4 c-caja">
+    <!-- TITULO -->
+    <div class="row mb-4">
+      <h2 class="text-center">{{title}} <span class="fw-light">Moneda</span> </h2>
     </div>
 
-
-    <!-- ENTRADAS -->
-    <!-- NOMBRE -->
     <div class="mb-3">
       <label class="form-label">Codigo Moneda</label>
       <input type="text" placeholder="Ingrese el codigo de moneda" formControlName="codigoMoneda" class="form-control">
@@ -22,7 +18,7 @@
         {{getFieldOfGroupError("codigoMoneda")}}
       </span>
     </div>
-    <!-- NOMBRE -->
+
     <div class="mb-3">
       <label class="form-label">Nombre</label>
       <input type="text" placeholder="Ingrese el nombre de la moneda" formControlName="nombre" class="form-control">
@@ -31,63 +27,21 @@
       </span>
     </div>
 
-
-    <!-- BOTON DE ENVIO -->
-    <!-- <div class="mb-3">
+    <div class="row">
       <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
-        class="btn btn-primary text-center">{{title}}</button>
-    </div> -->
-    <div class="row justify-content-center ">
-      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
-        class="btn btn-primary text-center">{{title}}</button>
+        class="btn btn-primary text-center d-flex justify-content-center"> <img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
     </div>
-
-  </section>
-
-
-
-</form>
-
-
-<!-- <div class="row">
-  <div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
-    <h3>Vista Previa</h3>
-    <hr>
-    <code>
-        <pre>Todos validos: {{ currencyForm.valid| json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Todos tocados: {{ currencyForm.touched | json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Formulario Cliente: {{ currencyForm.value| json }}</pre>
-      </code>
-    <hr>
-    <code>
-        <pre>Nuevo Telefono: {{ currencyForm.value| json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Cliente: {{ currencyForm| json }}</pre>
-    </code>
   </div>
-</div> -->
+</form>
+<!-- <code>
+    <pre>Formulario es valido: {{currencyForm.valid| json }}</pre>
+</code>
+<code>
+    <pre>Formulario Tipo Cambio: {{currencyForm.value| json }}</pre>
+</code>
 
-
-
-<!-- Codigo Banco -->
-<!-- <div class="mb-3">
-      <label class="form-label">Banco</label>
-      <select formControlName="codigoBanco" class="form-select" aria-label="Default select example">
-        <option selected class="text-center" value="">-- Seleccione un Banco --</option>
-        <option *ngFor="let bank of banks" [value]=bank.codigoBanco>
-          {{ bank.codigoBanco +' - '+ bank.nombre}}
-        </option>
-      </select>
-
-      <span *ngIf="isValidField('codigoBanco')" class="form-text text-danger">
-        {{getFieldOfGroupError("codigoBanco")}}
-      </span>
-    </div> -->
+<code>
+    <pre>current Tipo Cambio: {{currentCurrency | json }}</pre>
+</code> -->

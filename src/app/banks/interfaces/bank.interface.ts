@@ -32,7 +32,7 @@ export interface TelefonoCreateUpdate {
 export interface BankCreateUpdate {
   codigoBanco: String;
   nombre: String;
-  codigoMoneda: number;
+  codigoMoneda: string;
   codigoDistrito: number;
   direccionExacta: String;
 }

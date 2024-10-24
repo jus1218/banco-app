@@ -62,10 +62,19 @@ export class ValidatorsService {
   }
 
   public phoneIsValid = [Validators.required, Validators.pattern(/^[0-9]*$/), Validators.minLength(8), Validators.maxLength(15)];
-  public cedulaIsValid = [Validators.required, Validators.pattern(/^[1-9][0-9]*$/) , Validators.min(1), Validators.maxLength(9)];
+  public cedulaIsValid = [Validators.required, Validators.pattern(/^[1-9][0-9]*$/), Validators.min(1), Validators.maxLength(9)];
 
   public mountIsValid = [Validators.required, Validators.pattern('^\\d+(\\.\\d{1,2})?$')];
 
+  public offsetIsValid = [Validators.required, Validators.min(0)];
+  public offsetIsLimit = [Validators.required, Validators.min(1)];
+
+  // CUENTA CONTABLE
+  public codigoCuentaContableIsValid = [Validators.required, Validators.minLength(1), Validators.maxLength(12)];
+  public codigoBancoIsValid = [Validators.required, Validators.minLength(1), Validators.maxLength(3)];
+  public codigoMonedaIsValid = [Validators.required, Validators.minLength(1), Validators.maxLength(3)];
+  public descriptionIsValid = [Validators.required, Validators.minLength(1), Validators.maxLength(255)];
+  public codigoTipoCuentaContableIsValid = [Validators.required, Validators.min(1), Validators.minLength(1)];
 
 
 }

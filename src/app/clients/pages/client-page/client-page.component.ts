@@ -6,222 +6,151 @@ import { ValidatorsService } from '../../../shared/service/validator.service';
 import { MessageManagerService } from '../../../shared/service/message-manager.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TelefonoService } from '../../../shared/service/telefono.service';
-import { filter, Observable, Subscription, switchMap, tap } from 'rxjs';
+import { filter, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { Canton, Distrito, Provincia, Provincia2 } from '../../../shared/interfaces/provincia.interface';
 import { ClientService } from '../../services/client.service';
 import { ClienteCreateUpdate } from '../../interface/client.interface';
 import { Telefono } from '../../../banks/interfaces/bank.interface';
 import { PaginationService } from '../../../shared/service/pagination.service';
 import { RouterService } from '../../../shared/service/router.service';
+import { TitlePage } from '../../../shared/interfaces/title-page.interface';
+import { SelectorService } from '../../../shared/service/selector.service';
 
 @Component({
   selector: 'app-client-page',
   templateUrl: './client-page.component.html',
   styleUrl: './client-page.component.css'
 })
-export class ClientPageComponent implements OnInit, OnDestroy {
-  // Variables visuales y condicionales
-  public title: 'Agregar' | 'Editar' | 'Información' = 'Información';
+export class ClientPageComponent implements OnInit {
+
+
+  // Variables visuales
+  public title: TitlePage = 'Información';
   public isLoading: boolean = false;
+  public canPagination: boolean = false;
   public message: Message | null = null;
+
+  //Arreglos y obj seleccionados
+  public provincias: Provincia[] = [];
+  public cantones: Canton[] = [];
+  public distritos: Distrito[] = [];
   //Formularios
   public clientForm!: FormGroup;
-  public newPhone!: FormControl;
-  //Arreglos
-  public provinciasCantonesyDistritos: Provincia2 | undefined;
-  public cantonesByProvincia: Canton[] = [];
-  public distritosByCanton: Distrito[] = [];
-  get provincias(): Provincia[] {
-    return this.ubicationService.getProvincias;
-  }
-  get telefonos() {
-    return this.clientForm.get('telefonos') as FormArray;
-  }
-  //Suscripciones
-  private clientSubscription!: Subscription;
-  private provinciaSubscription !: Subscription;
-  private cantonSubscription !: Subscription;
+  //Otros
+  public provinciaSelected?: Provincia;
+  public cantonSelected?: Canton;
+
 
   constructor(
     private fb: FormBuilder,
-    private ubicationService: UbicationService,
     private validatorsService: ValidatorsService,
-    private messageManagerService: MessageManagerService,
+    private sms: MessageManagerService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private telefonoService: TelefonoService,
     private clientService: ClientService,
     private routerService: RouterService,
+    private selectorService: SelectorService,
 
   ) {
-    this.initValues();
+    this.initFormValues();
   }
 
   ngOnInit(): void {
+    this.configureFormByRoute();
     this.onProvinciaChanged();
     this.onCantonChanged();
 
+  }
+  configureFormByRoute(): void {
     if (this.router.url.includes('register')) {
       this.title = 'Agregar'
+      this.loadDataSelector();
+
       return;
     }
     if (this.router.url.includes('edit')) {
       this.title = 'Editar'
+      this.clientForm.get('codigoCliente')?.disable();
     } else {
       this.clientForm.disable();
     }
-
-    this.cargarCliente();
+    this.loadClient();
   }
-  ngOnDestroy(): void {
-    if (this.clientSubscription) {
-      this.clientSubscription.unsubscribe();
-    }
-    if (this.provinciaSubscription) {
-      this.provinciaSubscription.unsubscribe();
 
-    }
-    if (this.cantonSubscription) {
-      this.cantonSubscription.unsubscribe();
-    }
-    this.routerService.ultimaRuta = { modulo: 'clients', seccion: 'view' };
-  }
-  initValues() {
-    this.newPhone = new FormControl<String>('', this.validatorsService.phoneIsValid);
+  initFormValues() {
     this.clientForm = this.fb.group({
       codigoCliente: [''],
       nombre: ['', [Validators.required, Validators.maxLength(20)]],
       primerApellido: ['', [Validators.required, Validators.maxLength(20)]],
       segundoApellido: ['', [Validators.required, Validators.maxLength(20)]],
       cedula: ['', this.validatorsService.cedulaIsValid],
-      direccionExacta: ['', [Validators.required, Validators.maxLength(255)]],
       codigoDistrito: [0, [Validators.required, , Validators.min(1)]],
+      direccionExacta: ['', [Validators.required, Validators.maxLength(255)]],
       // otros
-
       codigoProvincia: [0, [Validators.required, Validators.min(1)]],
       codigoCanton: [0, [Validators.required, Validators.min(1)]],
-      telefonos: this.fb.array([
-      ])
+
     });
 
   }
-  cargarCliente(): void {
+  loadClient(): void {
     this.isLoading = true;
+
 
     this.activatedRoute.params
       .pipe(
-        tap(({ id }) =>
+        switchMap(({ id }) => this.clientService.getCliente(Number(id))),
+        switchMap(({ message, success: isSuccess, value: client }) => {
 
-          this.telefonoService.getPhonesByCodeClient(id)
-            .subscribe(res => this.onAddPhones(res.value!))
-        ),
-        switchMap(({ id }) => {
-          return this.clientService.getCliente(Number(id));
-        }),
-      ).subscribe(res => {
-        this.clientForm.reset({ ...res.value, telefonos: this.telefonos.value });
-        this.asignarDistritoCantonProvincia(res.value!.codigoDistrito);
-
-
-
+          if (!isSuccess) {
+            this.sms.simpleBox({ message, success: isSuccess });
+            this.isLoading = false;
+            this.router.navigate(['/clients/list']);
+            return of();
+          }
+          this.clientForm.reset({ ...client, codigoDistrito: client?.codigoDistrito });
+          this.clientForm.get("codigoDistrito")?.setValue(client?.codigoDistrito);
+          return this.selectorService.getAll();
+        })
+      )
+      .subscribe(({ message, success: isSuccess, value: selectors }) => {
         this.isLoading = false;
-        return;
+        if (!isSuccess) {
+          this.sms.simpleBox({ message, success: isSuccess });
+          this.router.navigate(['/clients/list']);
+          return;
+        }
+
+        this.provincias = selectors!.provincias;
+
+        const provincia = this.provincias.find(p => p.cantones.find(c => c.distritos.find(d => d.codigoDistrito === this.currentClient.distrito)));
+        const canton = provincia?.cantones.find(c => c.distritos.find(d => d.codigoDistrito === this.currentClient.distrito));
+
+        this.clientForm.get('codigoProvincia')?.setValue(provincia?.codigoProvincia);
+        this.findCantons(provincia!.codigoProvincia);
+        this.clientForm.get('codigoCanton')?.setValue(canton?.codigoCanton);
+        this.findDistricts(canton!.codigoCanton);
+        // this.clientForm.get('codigoDistrito')?.setValue(value?.codigoDistrito);
       });
 
-
-
-
   }
+  loadDataSelector(): void {
 
-  asignarDistritoCantonProvincia(codigoDistrito: number): void {
-    this.provinciasCantonesyDistritos = this.ubicationService.getProvinciaCantonbyIdDistrito(codigoDistrito);
-    if (!this.provinciasCantonesyDistritos) return;
-    this.clientForm.get('codigoProvincia')?.setValue(this.provinciasCantonesyDistritos?.codigoProvincia);
-    this.cantonesByProvincia = this.ubicationService.getCantones(this.provinciasCantonesyDistritos!.codigoProvincia);
-    this.clientForm.get('codigoCanton')?.setValue(this.provinciasCantonesyDistritos?.canton.codigoCanton);
-    this.distritosByCanton = this.ubicationService.getDistritos(this.provinciasCantonesyDistritos!.canton.codigoCanton);
-    this.clientForm.get('codigoDistrito')?.setValue(this.provinciasCantonesyDistritos?.canton.distrito.codigoDistrito);
-  }
+    this.selectorService.getAll().subscribe(({ message, success: isSuccess, value }) => {
 
-  onProvinciaChanged() {
-    this.provinciaSubscription = (this.clientForm.get('codigoProvincia')!.valueChanges as Observable<number>)
-      .pipe(
-        tap(() => this.clientForm.get("codigoCanton")!.setValue(0)),
-        tap(() => this.cantonesByProvincia = []),
-        filter((value: any) => {
-          if (!value) return false;
-          return value > 0
-        })//evita que se haga llamados si el valor es vacio
-      )
-      .subscribe(idProvincia => {
+      if (!isSuccess) {
+        this.sms.simpleBox({ message, success: isSuccess })
+        this.isLoading = false;
+        this.router.navigate(['/clients/list']);
+      }
 
-        const id = idProvincia as number;
+      this.provincias = value?.provincias!;
 
-        this.cantonesByProvincia = this.ubicationService.getCantones(id);
-      })
-  }
-  onCantonChanged() {
-    this.cantonSubscription = this.clientForm.get('codigoCanton')!.valueChanges
-      .pipe(
-        tap(() => this.clientForm.get("codigoDistrito")!.setValue(0)),
-        tap(() => this.distritosByCanton = []),
-        filter(value => {
-          if (!value) return false;
-          return value.length > 0
-        })//evita que se haga llamados si el valor es vacio
-      )
-      .subscribe(idCanton => {
-
-        console.log("idprovincia: " + !idCanton);
-        const id = idCanton as number;
-        this.distritosByCanton = this.ubicationService.getDistritos(id)
-      })
-  }
-
-  // ACCIONES
-  onAddPhone(): void {
-    if (this.newPhone.invalid) {
-      this.newPhone.markAsTouched();
-      return;
-    }
-
-    const newNumberPhone = this.newPhone.value ?? undefined;
-
-    if (!newNumberPhone) return;
-
-    this.telefonoService.createPhoneBank(
-      {
-        numero: newNumberPhone,
-        codigoBanco: null,
-        codigoTelefono: null,
-        codigoCliente: this.currentClient.codigoCliente
-      }).subscribe(res => {
-        this.showMessage(res.message, res.success);
-        if (!res.success) return;
-
-
-        this.telefonos.push(this.fb.control(res.value!.numero, this.validatorsService.phoneIsValid));
-        this.newPhone.reset('');
-      })
-
-  }
-
-  onDeletePhone(index: number): void {
-    const numero = this.telefonos.at(index).value as string;
-    this.telefonoService.deletePhone(numero).subscribe(res => {
-      this.telefonos.removeAt(index);
-      this.showMessage(res.message, res.success);
-
-    })
-  }
-  onAddPhones(telefonos: Telefono[]): void {
-
-    if (!telefonos) return;
-    telefonos.forEach(telefono => {
-      this.telefonos.push(new FormControl<String>(telefono.numero, this.validatorsService.phoneIsValid));
     });
 
   }
+
+
 
   onSubmit(): void {
     if (this.clientForm.invalid) {
@@ -231,14 +160,13 @@ export class ClientPageComponent implements OnInit, OnDestroy {
     if (this.title === "Editar") {
 
       this.clientService.updatCliente(this.currentClient)
-        .subscribe(res => this.showMessage(res.message, res.success))
+        .subscribe(({ message, success: isSuccess }) => this.sms.simpleBox({ message, success: isSuccess }))
       return;
     }
 
-    this.clientService.createCliente(this.currentClient).subscribe(res => {
-      this.showMessage(res.message, res.success);
-      if (!res.success) return;
-
+    this.clientService.createCliente(this.currentClient).subscribe(({ message, success: isSuccess }) => {
+      this.sms.simpleBox({ message, success: isSuccess })
+      if (!isSuccess) return;
 
       this.clientForm.reset({
         nombre: "",
@@ -254,41 +182,80 @@ export class ClientPageComponent implements OnInit, OnDestroy {
   }
 
   // VALIDACIONES Y MUESTRA DE MENSAJES
-  getFormControlError() {
-    return this.messageManagerService.getFieldOfControlError(this.newPhone);
-  }
-  isValidFormControl() {
-    return this.validatorsService.isValidFormControl(this.newPhone);
-  }
+
+
 
   isValidField(field: string) {
     return this.validatorsService.isValidField(this.clientForm, field);
   }
-
   getFieldOfGroupError(field: string) {
-    return this.messageManagerService.getFieldOfGroupError(field, this.clientForm);;
+    const message = this.sms.getFieldOfGroupError(field, this.clientForm);
+    return message;
+  }
+  onProvinciaChanged() {
+    this.clientForm.get('codigoProvincia')!.valueChanges
+      .pipe(
+        filter(value => {
+          if (!value) return false;
+          return value.length > 0
+        }),//evita que se haga llamados si el valor es vacio
+        tap(() => this.clientForm.get("codigoCanton")!.setValue(0)),
+        tap(() => this.clientForm.get("codigoDistrito")!.setValue(0)),
+        tap(() => this.cantones = []),
+        tap(() => this.distritos = []),
+      )
+      .subscribe(idProvincia => this.findCantons(idProvincia));
+  }
+  findCantons(idProvincia: number): void {
+    const cantones = this.provincias.find(p => p.codigoProvincia === Number(idProvincia))?.cantones;
+    if (!cantones) {
+      this.cantones = [];
+      return;
+    }
+    this.cantones = cantones;
+
+  }
+
+  onCantonChanged() {
+    this.clientForm.get('codigoCanton')!.valueChanges
+      .pipe(
+        filter(value => {
+          if (!value) return false;
+          return value.length > 0
+        }),//evita que se haga llamados si el valor es vacio
+        tap(() => this.clientForm.get('codigoDistrito')!.setValue(0)),
+        tap(() => this.distritos = []),
+      )
+      .subscribe(idCanton => this.findDistricts(idCanton));
+  }
+  findDistricts(idCanton: number): void {
+    const distritos = this.cantones.find(c => c.codigoCanton === Number(idCanton))?.distritos;
+    if (!distritos) {
+      this.distritos = [];
+      return;
+    }
+    this.distritos = distritos;
+
   }
 
   //OTROS
 
   get currentClient(): ClienteCreateUpdate {
-    const cliente = this.clientForm
+    const form = this.clientForm
 
     return {
-      ...cliente.value,
-      cedula: (Number(cliente.get('cedula')?.value)) ?? 0,
-      codigoProvincia: (Number(cliente.get('codigoProvincia')?.value)) ?? 0,
-      codigoCanton: (Number(cliente.get('codigoCanton')?.value)) ?? 0,
-      distrito: (Number(cliente.get('codigoDistrito')?.value)) ?? 0,
+      codigoCliente: form.get('codigoCliente')?.value,
+      nombre: form.get('nombre')?.value,
+      primerApellido: form.get('primerApellido')?.value,
+      segundoApellido: form.get('segundoApellido')?.value,
+      cedula: (Number(form.get('cedula')?.value)) ?? 0,
+      distrito: (Number(form.get('codigoDistrito')?.value)) ?? 0,
+      direccionExacta: form.get('direccionExacta')?.value,
+
 
     };
   }
-  showMessage(message: string, isSuccess: boolean) {
-    this.message = { message, isSuccess };
-    setTimeout(() => {
-      this.message = null;
-    }, 4000);
-  }
+
 }
 
 

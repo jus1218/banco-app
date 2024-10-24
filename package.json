@@ -20,6 +20,7 @@
     "@angular/router": "^18.2.0",
     "banco": "file:",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.14.2",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.10"
   },
@@ -35,5 +36,9 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.2"
-  }
+  },
+  "styles": [
+    "src/styles.css",
+    "node_modules/sweetalert2/src/sweetalert2.scss"
+  ]
 }

@@ -25,6 +25,31 @@ const routes: Routes = [
     loadChildren: () => import('./exchange-rate/exchange-rate.module').then(m => m.ExchangeRateModule)
   },
   {
+    path: 'client-accounts',
+    loadChildren: () => import('./client-account/client-account.module').then(m => m.ClientAccountModule)
+  },
+  {
+    path: 'provinces',
+    loadChildren: () => import('./province/province.module').then(m => m.ProvinceModule)
+  },
+  {
+    path: 'districts',
+    loadChildren: () => import('./district/district.module').then(m => m.DistrictModule)
+  },
+  {
+    path: 'cantons',
+    loadChildren: () => import('./canton/canton.module').then(m => m.CantonModule)
+  },
+  {
+    path: 'phones',
+    loadChildren: () => import('./phone/phone.module').then(m => m.PhoneModule)
+  }
+  ,
+  {
+    path: 'leager-accounts',
+    loadChildren: () => import('./leager-account/leager-account.module').then(m => m.LeagerAccountModule)
+  },
+  {
     path: '404',
     component: NotFoundPageComponent
   },

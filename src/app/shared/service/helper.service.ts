@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { CommonResponse } from '../../clients/interface/client.interface';
+import { HttpErrorResponse } from '@angular/common/http';
+import { MessageManagerService } from './message-manager.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
 
-  constructor() { }
+  constructor(private sms:MessageManagerService) { }
 
   formatStringToDate(fecha: string): string {
 
@@ -44,6 +46,8 @@ export class HelperService {
 
 
   catchErrorP<T>(messsage: string): Observable<CommonResponse<T>> {
+
+
     const message: CommonResponse<T> = {
       value: null,
       message: messsage,
@@ -51,14 +55,28 @@ export class HelperService {
     }
     return of(message);
   }
+  catchErrorP2<T>(error: HttpErrorResponse): Observable<CommonResponse<T>> {
+    let msg = 'Ocurrió un problema en la conexión a Internet. Por favor, inténtalo de nuevo más tarde.';
+    if (error.error.detail) {
+      // Error del lado del backend
+      msg = error.error.detail;
+    }
+    const message: CommonResponse<T> = {
+      value: null,
+      message: msg,
+      success: false
+    }
+    return of(message);
+  }
 
 
   formatCurrent(value: number, currency: string) {
-    if (!value) return '';
+    if (value === null || value === undefined) return '';
+
     const m: { [key in string]: string } = {
       'USD': `$ ${value.toFixed(2)}`,
       'EUR': `€ ${value.toFixed(2)}`,
-      'CRC': `₡ ${value.toFixed(2)}`,
+      'CRC': `₡ ${value.toFixed(2)} `,
       'Y': `¥ ${value.toFixed(2)}`,
       'RUB': `₽ ${value.toFixed(2)}`
     };
@@ -66,4 +84,20 @@ export class HelperService {
     return m[currency] || value.toString();
 
   }
+
+
+
+
+  handleResponse<T>(response: Observable<CommonResponse<T>>): Observable<CommonResponse<T>> {
+    return response.pipe(
+      catchError(err => this.catchErrorP2<T>(err))
+    );
+  }
+
+  // hanleResponseDelete<T>({ message, success: isSuccess }: CommonResponse<T>): Boolean {
+  //   this.sms.simpleBox({ message, success: isSuccess });
+  //   if (isSuccess) return;
+  //   this.isLoading = false;
+  // }
+
 }

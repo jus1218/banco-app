@@ -4,6 +4,7 @@ import { CommonResponse } from '../../clients/interface/client.interface';
 import { Currency } from '../interface/currency.interface';
 import { environments } from '../../../environments/environments';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { HelperService } from '../../shared/service/helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class CurrencyService {
 
 
   private baseUrl: String = environments.baseUrl + '/moneda';
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private helperService: HelperService) { }
 
 
   createCurrency(currency: Currency): Observable<CommonResponse<Currency>> {
@@ -55,6 +56,11 @@ export class CurrencyService {
       .pipe(
         catchError(err => this.catchErrorP<Currency[]>(err.error.detail))
       );
+  }
+  deleteCurrency(id: string): Observable<CommonResponse<Currency>> {
+    const url = `${this.baseUrl}/${id}`;
+    const response = this.http.delete<CommonResponse<Currency>>(url);
+    return this.helperService.handleResponse(response);
   }
 
 

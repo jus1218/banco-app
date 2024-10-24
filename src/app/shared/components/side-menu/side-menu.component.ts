@@ -24,6 +24,17 @@ export class SideMenuComponent {
       label: 'Tipos de Cambio',
       url: '/exchange-rates'
     },
-
+    {
+      label: 'Cuentas Clientes',
+      url: '/client-accounts'
+    },
+    {
+      label: 'Provincias',
+      url: '/provinces'
+    },
+    {
+      label: 'Cuentas Contables',
+      url: '/leager-accounts'
+    },
   ]
 }

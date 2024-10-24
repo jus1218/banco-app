@@ -1,0 +1,53 @@
+<app-loading-spinner *ngIf="isLoading" [title]="'Tipos de cambios'"></app-loading-spinner>
+<app-alert-dialog [message]="message"></app-alert-dialog>
+
+
+<form class="row row-cols-12  row-cols-sm-10 row-cols-md-8 row-cols-lg-8 row-cols-xl-8 row-cols-xll-8 p-3  justify-content-center"
+  [formGroup]="districtForm" autocomplete="off">
+
+  <div class="col-12 col-sm-12 col-md-6  col-lg-4  border rounded mt-0 mt-sm-2   p-4 c-caja">
+    <!-- TITULO -->
+    <div class="row mb-4">
+
+      <h2 class="text-center">{{title}} <span class="fw-light">Distrito</span> </h2>
+    </div>
+
+    <!-- CODIGO_PROVINCIA -->
+    <div class="mb-3">
+      <label class="form-label">Codigo Distrito</label>
+      <input type="text" placeholder="Ingrese codigo distrito" formControlName="codigoDistrito" class="form-control">
+      <span *ngIf="isValidField('codigoDistrito')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoDistrito")}}
+      </span>
+    </div>
+    <!-- NOMBRE_PROVINCIA -->
+    <div class="mb-3">
+      <label class="form-label">Nombre Distrito</label>
+      <input type="text" placeholder="Ingrese nombre distrito" formControlName="nombre" class="form-control">
+      <span *ngIf="isValidField('nombre')" class="form-text text-danger">
+        {{getFieldOfGroupError("nombre")}}
+      </span>
+    </div>
+
+    <div class="row">
+      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()" class="btn btn-primary text-center d-flex justify-content-center"> <img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px" class="me-1">{{title}}</button>
+    </div>
+
+  </div>
+
+
+</form>
+
+
+<!-- <code>
+    <pre>Formulario es valido: {{districtForm.valid| json }}</pre>
+</code>
+<code>
+    <pre>Formulario Tipo Cambio: {{districtForm.value| json }}</pre>
+</code>
+
+
+<code>
+    <pre>current Tipo Cambio: {{currentDistrict| json }}</pre>
+</code> -->

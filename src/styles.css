@@ -159,3 +159,12 @@ p{
   text-align: center;
 }
 
+
+figure{
+  display: flex;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    unicode-bidi: isolate;
+}

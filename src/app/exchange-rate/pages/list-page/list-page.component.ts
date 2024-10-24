@@ -7,17 +7,20 @@ import { RouterService } from '../../../shared/service/router.service';
 import { ExchangeRateService } from '../../service/exchange-rate.service';
 import { BanksService } from '../../../banks/services/banks.service';
 import { Bank } from '../../../banks/interfaces/bank.interface';
-import { tap } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { CurrencyService } from '../../../currencies/service/currency.service';
 import { Currency } from '../../../currencies/interface/currency.interface';
 import { HelperService } from '../../../shared/service/helper.service';
+import { MessageManagerService } from '../../../shared/service/message-manager.service';
+import { CommonResponse } from '../../../clients/interface/client.interface';
+import { BancoSelector, Selector, SelectorService } from '../../../shared/service/selector.service';
 
 @Component({
   selector: 'app-list-page',
   templateUrl: './list-page.component.html',
   styleUrl: './list-page.component.css'
 })
-export class ListPageComponent implements OnInit, OnDestroy {
+export class ListPageComponent implements OnInit {
 
   // Variables visuales
   public isLoading: boolean = false;
@@ -25,59 +28,27 @@ export class ListPageComponent implements OnInit, OnDestroy {
   public message: Message | null = null;
 
   // Formulario
-  public PaginationForm!: FormGroup;
+  public paginationForm!: FormGroup;
   public exchangeRateToRemove: ExchangeRate | null = null;
   // Arreglos
   public exchangeRates: ExchangeRate[] = [];
-  public banks: Bank[] = [];
+  public banks: BancoSelector[] = [];
   public currencies: Currency[] = [];
 
-  //Ruta
-  public rutaActual: Ruta = {
-    modulo: 'exchange-rates',
-    seccion: 'list'
-  }
+
 
 
   constructor(
-    private routerService: RouterService,
     private fb: FormBuilder,
+    private helperService: HelperService,
+    private sms: MessageManagerService,
     private exchangeRateService: ExchangeRateService,
-    private banksService: BanksService,
-    private currencyService: CurrencyService,
-    private helperService: HelperService
+    private selectorService: SelectorService
   ) {
     this.initValues();
-    // this.banksService.getBancos(0, 5, null).subscribe(res => this.banks = res);
   }
-  ngOnDestroy(): void {
-    this.routerService.ultimaRuta = this.rutaActual;
-  }
-  ngOnInit(): void {
-    this.isLoading = true;
-
-
-
-    this.exchangeRateService.getExchangeRates({ offset: 0, limit: 5, codigoMoneda: null, fecha: null, codigoBanco: null })
-      .pipe(
-        tap(() => this.banksService.getBancos2(0, 1000, null).subscribe(res => {
-          if (!res.success) {
-            this.showMessage({ message: res.message, isSuccess: res.success })
-            return;
-          }
-          this.banks = res.value!
-        })),
-        tap(() => this.currencyService.getCurrencies(0, 1000, null).subscribe(res => this.currencies = res.value!))
-      ).subscribe(res => {
-        this.exchangeRates = res.value!;
-        this.canPagination = res.value!.length === this.currentPagination.limit;
-        this.isLoading = false;
-      })
-
-  }
-
   initValues(): void {
-    this.PaginationForm = this.fb.group(
+    this.paginationForm = this.fb.group(
       {
         offset: [0, [Validators.required, Validators.min(0)]],
         limit: [5, [Validators.required, Validators.min(1)]],
@@ -87,84 +58,100 @@ export class ListPageComponent implements OnInit, OnDestroy {
       }
     );
   }
+  ngOnInit(): void {
+    this.loadExchangeRates();
+  }
 
-  showMessage(message: Message) {
-    this.message = message;
-    setTimeout(() => {
-      this.message = null
-    }, 4000);
+  loadExchangeRates(): void {
+    this.isLoading = true;
+    const { offset, limit, codigoBanco, codigoMoneda, fecha } = this.currentPagination;
+    this.exchangeRateService.getExchangeRates({ offset: offset * limit, limit, codigoMoneda, fecha, codigoBanco })
+      .pipe(
+        switchMap(res => {
+          this.handleResponse(res);
+          return this.selectorService.getAll();
+        })
+      )
+      .subscribe(res => this.handleResponseDataSelector(res));
+  }
+
+  handleResponse({ success: isSuccess, message, value }: CommonResponse<ExchangeRate[]>): void {
+    this.isLoading = false;
+    if (!isSuccess) {
+      this.sms.simpleBox({ message, success: isSuccess })
+      return;
+    }
+    this.canPagination = value!.length === this.currentPagination.limit;
+    this.exchangeRates = value!;
+  }
+
+  handleResponseDataSelector({ success: isSuccess, message, value }: CommonResponse<Selector>): void {
+    if (!isSuccess) {
+      this.sms.simpleBox({ message, success: isSuccess })
+      return;
+    }
+
+    this.currencies = value!.monedas;
+    this.banks = value!.bancos;
+
   }
 
   filter() {
-    this.isLoading = true;
-    this.PaginationForm.get('offset')?.setValue(0);
-    this.exchangeRateService.getExchangeRates(this.currentPagination)
-      .subscribe(res => {
-        this.exchangeRates = res.value!;
-        this.canPagination = res.value!.length === this.currentPagination.limit;
-        this.isLoading = false;
-      })
-
+    this.paginationForm.get('offset')?.setValue(0);
+    this.loadExchangeRates();
   }
 
 
   get currentPagination(): PaginationExchangeRate {
 
-    const filter = this.PaginationForm.value;
-    const fecha = this.PaginationForm.get('fecha')?.value;
+    const form = this.paginationForm;
+    const codigoBanco = String(this.paginationForm.get('codigoBanco')?.value);
+    const codigoMoneda = String(this.paginationForm.get('codigoMoneda')?.value);
+    let fecha = this.paginationForm.get('fecha')?.value;
 
-    if (fecha !== '') filter.fecha = this.helperService.formatDateToString(fecha);
-    return { ...filter }
+    fecha = fecha !== '' ? this.helperService.formatDateToString(fecha) : null;
+
+    return {
+      ...form.value,
+      fecha: fecha,
+      codigoBanco: codigoBanco.length === 0 ? null : codigoBanco,
+      codigoMoneda: codigoMoneda.length === 0 ? null : codigoMoneda
+    }
   }
 
 
   increase() {
-    this.paginate(this.currentPagination.offset + 1);
+    this.paginationForm.get('offset')?.setValue(this.currentPagination.offset + 1);
+    this.loadExchangeRates();
   }
 
   decrease() {
-    this.paginate(this.currentPagination.offset - 1);
+    this.paginationForm.get('offset')?.setValue(this.currentPagination.offset - 1);
+    this.loadExchangeRates();
   }
 
-
-  paginate(newOffset: number) {
-    this.isLoading = true;
-    this.PaginationForm.get('offset')?.setValue(newOffset);
-
-    this.exchangeRateService.getExchangeRates({
-      ...this.currentPagination,
-      offset: this.currentPagination.offset * this.currentPagination.limit,
-    })
-      .subscribe(res => {
-        this.exchangeRates = res.value!;
-        this.canPagination = res.value!.length === this.currentPagination.limit;
-        this.isLoading = false;
-      })
-
-  }
-
-
-  setDelete(exchangeRateToRemove: ExchangeRate) {
-    this.exchangeRateToRemove = exchangeRateToRemove;
-  }
 
   deleteExchangeRate(exchangeRateToRemove: ExchangeRate) {
-    this.isLoading = true;
-    this.exchangeRateService.deleteExchangeRate({ ...exchangeRateToRemove, fecha: this.helperService.formatDateToString(exchangeRateToRemove.fecha.toString()) })
-      .subscribe(res => {
-        this.showMessage({ message: res.message, isSuccess: res.success });
-        this.isLoading = false;
-        this.exchangeRates = this.exchangeRates
-          .filter(ex =>
-          (ex.codigoBanco !== exchangeRateToRemove.codigoBanco &&
-            ex.fecha !== exchangeRateToRemove.fecha &&
-            ex.codigoMoneda !== exchangeRateToRemove.codigoMoneda
-          )
-        )
 
+    this.sms.confirmBox({})
+      .pipe(
+        switchMap((confirmed) => {
+          if (!confirmed) return of();
+          this.isLoading = true;
+          return this.exchangeRateService.deleteExchangeRate({ ...exchangeRateToRemove, fecha: this.helperService.formatDateToString(exchangeRateToRemove.fecha.toString()) })
+        }),
 
+        switchMap(({ message, success }) => {
+          this.sms.simpleBox({ message, success });
+          if (!success) {
+            this.isLoading = false;
+            return of();
+          }
+          const { offset, limit, codigoBanco, codigoMoneda, fecha } = this.currentPagination;
+          return this.exchangeRateService.getExchangeRates({ offset: offset * limit, limit, codigoMoneda, fecha, codigoBanco })
+        })
+      ).subscribe(res => this.handleResponse(res));
 
-      })
   }
 }
 

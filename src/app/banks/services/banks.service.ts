@@ -18,7 +18,7 @@ export class BanksService {
   constructor(private http: HttpClient, private helperService: HelperService) { }
 
 
-  getBancos(offset: number, limit: number, nombre: string | null): Observable<Bank[]> {
+  getBancos(offset: number, limit: number, nombre: string | null): Observable<CommonResponse<Bank[]>> {
     const name: string = nombre ?? '';
     let params = new HttpParams()
       .set('offset', offset)
@@ -27,13 +27,30 @@ export class BanksService {
 
     return this.http.get<CommonResponse<Bank[]>>(`${this.baseUrl}`, { params })
       .pipe(
-        tap(response => console.log('Datos recibidos:', response)),
-        map(res => res.value!),
-        tap(banks => console.log(banks),
-        )
-      )
+        catchError(err => this.helperService.catchErrorP2<Bank[]>(err))
+      );
+
 
   }
+  // getBancos(offset: number, limit: number, nombre: string | null): Observable<Bank[]> {
+  //   const name: string = nombre ?? '';
+  //   let params = new HttpParams()
+  //     .set('offset', offset)
+  //     .set('limit', limit)
+  //     .set('nombre', name);
+
+  //   return this.http.get<CommonResponse<Bank[]>>(`${this.baseUrl}`, { params })
+  //     .pipe(
+  //       tap(response => console.log('Datos recibidos:', response)),
+  //       map(res => res.value!),
+  //       tap(banks => console.log(banks),
+  //       )
+  //     )
+
+  // }
+
+
+
   getBancos2(offset: number, limit: number, nombre: string | null): Observable<CommonResponse<Bank[]>> {
     const name: string = nombre ?? '';
     let params = new HttpParams()
@@ -48,14 +65,22 @@ export class BanksService {
 
   }
 
-  getBanco(id: string): Observable<BankInfo | null> {
+  getBanco(id: string): Observable<CommonResponse<BankInfo>> {
 
     const url: string = `${this.baseUrl}/search/${id}`;
 
-    return this.http.get<CommonResponseV<BankInfo | null>>(url).pipe(
-      // tap(response => console.log('Datos recibidos:', response)),
-      map(res => res.value),);
+    return this.http.get<CommonResponse<BankInfo>>(url).pipe(
+      catchError(err => this.helperService.catchErrorP2<BankInfo>(err))
+    );
   }
+  // getBanco(id: string): Observable<BankInfo | null> {
+
+  //   const url: string = `${this.baseUrl}/search/${id}`;
+
+  //   return this.http.get<CommonResponseV<BankInfo | null>>(url).pipe(
+  //     // tap(response => console.log('Datos recibidos:', response)),
+  //     map(res => res.value),);
+  // }
 
   getPhonesByCodeBank(codigoBanco: string): Observable<CommonResponseV<Telefono[]>> {
     const url: string = `${this.baseUrl}/phones/${codigoBanco}`;
@@ -100,6 +125,15 @@ export class BanksService {
         return of(message)
       })
     )
+  }
+
+
+  deleteBank(codigoBanco: string): Observable<CommonResponse<BankInfo>> {
+
+    return this.http.delete<CommonResponse<BankInfo>>(`${environments.baseUrl}/bancos/${codigoBanco}`)
+      .pipe(
+        catchError(err => this.helperService.catchErrorP2<BankInfo>(err))
+      );
   }
 
 }

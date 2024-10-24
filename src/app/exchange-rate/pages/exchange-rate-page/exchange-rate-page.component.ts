@@ -13,6 +13,8 @@ import { switchMap, tap } from 'rxjs';
 import { ExchangeRate } from '../../interfaces/exchange-rate.interface';
 import { HelperService } from '../../../shared/service/helper.service';
 import { ExchangeRateService } from '../../service/exchange-rate.service';
+import { BancoSelector, Selector, SelectorService } from '../../../shared/service/selector.service';
+import { CommonResponse } from '../../../clients/interface/client.interface';
 
 @Component({
   selector: 'app-exchange-rate-page',
@@ -26,7 +28,7 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
   public isLoading: boolean = false;
   public message: Message | null = null;
   //Arreglos
-  public banks: Bank[] = []
+  public banks: BancoSelector[] = []
   public currencies: Currency[] = [];
 
   //Formularios
@@ -42,7 +44,8 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
     private currencyService: CurrencyService,
     private router: Router,
     private helperService: HelperService,
-    private exchangeRateService: ExchangeRateService
+    private exchangeRateService: ExchangeRateService,
+    private selectorService: SelectorService,
   ) {
     this.initValues();
 
@@ -62,8 +65,12 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isLoading = true;
     if (this.router.url.includes('register')) {
-      this.cargarDatos();
+      // this.cargarDatos();
       this.title = 'Agregar'
+      this.selectorService.getAll().subscribe(res => {
+        this.handleResponseDataSelector(res);
+        this.isLoading = false;
+      });
       return;
     }
     if (this.router.url.includes('edit')) {
@@ -78,47 +85,84 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
     this.cargarTipoCambio();
   }
 
-  cargarDatos(): void {
-    this.banksService.getBancos2(0, 1000, null)
-      .pipe(tap(() => this.currencyService.getCurrencies(0, 1000, null).subscribe(res => this.currencies = res.value!)))
-      .subscribe(res => {
-        if (!res.success) {
-          this.showMessage({ message: res.message, isSuccess: res.success })
-          return;
-        }
-        this.banks = res.value!;
-        this.isLoading = false;
-      });
+  // cargarDatos(): void {
+  //   this.banksService.getBancos2(0, 1000, null)
+  //     .pipe(tap(() => this.currencyService.getCurrencies(0, 1000, null).subscribe(res => this.currencies = res.value!)))
+  //     .subscribe(res => {
+  //       if (!res.success) {
+  //         this.showMessage({ message: res.message, success: res.success })
+  //         return;
+  //       }
+  //       this.banks = res.value!;
+  //       this.isLoading = false;
+  //     });
 
-  }
+  // }
 
   cargarTipoCambio(): void {
+    this.activatedRoute.params.pipe(
+      switchMap(({ codigoMoneda, fecha, codigoBanco }) =>
+        this.selectorService.getAll().pipe(switchMap(res => {
+          this.handleResponseDataSelector(res);
 
+          const fechaToString = this.helperService.formatDateToString(fecha)
+          return this.exchangeRateService.getExchangeRate({ codigoMoneda, fecha: fechaToString, codigoBanco });
+        })))).subscribe(res => this.handleResponse(res))
     // this.exchangeRateService.getExchangeRate({})
 
-    this.activatedRoute.params.pipe(
-      // tap(() => ),
-      switchMap(({ codigoMoneda, fecha, codigoBanco }) => {
+    // this.activatedRoute.params.pipe(
+    //   // tap(() => ),
+    //   switchMap(({ codigoMoneda, fecha, codigoBanco }) => {
 
-        const fechaToString = this.helperService.formatDateToString(fecha)
-        return this.exchangeRateService.getExchangeRate({ codigoMoneda: codigoMoneda, fecha: fechaToString, codigoBanco: codigoBanco });
-      })
-    ).subscribe(res => {
+    //     const fechaToString = this.helperService.formatDateToString(fecha)
+    //     return this.exchangeRateService.getExchangeRate({ codigoMoneda: codigoMoneda, fecha: fechaToString, codigoBanco: codigoBanco });
+    //   })
+    // ).subscribe(res => {
 
-      this.cargarDatos();
-      if (!res.success) {
-        this.showMessage({ message: res.message, isSuccess: res.success })
-        return;
-      }
+    //   this.cargarDatos();
+    //   if (!res.success) {
+    //     this.showMessage({ message: res.message, success: res.success })
+    //     return;
+    //   }
 
-      this.exchangeRateForm.reset({
-        ...res.value,
-        fecha: this.helperService.formatDateToString2(res.value!.fecha)
-      })
+    //   this.exchangeRateForm.reset({
+    //     ...res.value,
+    //     fecha: this.helperService.formatDateToString2(res.value!.fecha)
+    //   })
 
+    //   this.isLoading = false;
+    //   return;
+    // })
+  }
+
+
+  handleResponseDataSelector({ success: isSuccess, message, value }: CommonResponse<Selector>): void {
+
+    if (!isSuccess) {
+      this.messageManagerService.simpleBox({ message, success: isSuccess })
       this.isLoading = false;
+      this.router.navigate(['/exchange-rates/list']);
       return;
+    }
+
+    this.banks = value!.bancos;
+    this.currencies = value!.monedas;
+  }
+  handleResponse({ success, message, value: exchangeRate }: CommonResponse<ExchangeRate>): void {
+
+    if (!success) {
+      this.messageManagerService.simpleBox({ message, success })
+      return;
+    }
+
+    this.exchangeRateForm.reset({
+      ...exchangeRate,
+      fecha: this.helperService.formatDateToString2(exchangeRate!.fecha)
     })
+
+    this.isLoading = false;
+    return;
+
   }
 
   onSubmit() {
@@ -131,21 +175,24 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
     if (this.title === "Editar") {
 
       this.exchangeRateService.updateExchangeRate(this.currentTipoCambio)
-        .subscribe(res => {
-          this.showMessage({ message: res.message, isSuccess: res.success })
+        .subscribe(({ message, success }) => {
+          this.messageManagerService.simpleBox({ message, success })
         })
       return;
     }
 
-    this.exchangeRateService.createExchangeRate(this.currentTipoCambio).subscribe(res => {
-      this.showMessage({ message: res.message, isSuccess: res.success });
-      if (!res.success) return;
+    this.exchangeRateService.createExchangeRate(this.currentTipoCambio).subscribe(({ message, success }) => {
+      this.messageManagerService.simpleBox({ message, success })
+      if (!success) return;
+
+      this.exchangeRateForm.reset({
+        codigoMoneda: '',
+        codigoBanco: ''
+      });
+
     });
 
-    this.exchangeRateForm.reset({
-      codigoMoneda: '',
-      codigoBanco: ''
-    });
+
 
   }
 
@@ -188,12 +235,7 @@ export class ExchangeRatePageComponent implements OnInit, OnDestroy {
     };
   }
 
-  showMessage(message: Message) {
-    this.message = message;
-    setTimeout(() => {
-      this.message = null
-    }, 4000);
-  }
+
 
 
 }

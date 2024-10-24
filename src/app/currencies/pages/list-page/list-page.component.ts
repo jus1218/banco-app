@@ -7,13 +7,19 @@ import { Router } from '@angular/router';
 import { PaginationService } from '../../../shared/service/pagination.service';
 import { RouterService } from '../../../shared/service/router.service';
 import { CurrencyService } from '../../service/currency.service';
-
+import { MessageManagerService } from '../../../shared/service/message-manager.service';
+import { CommonResponse } from '../../../clients/interface/client.interface';
+import { filter, of, switchMap } from 'rxjs';
+import { DEFAULT_OFFSET } from '../../../shared/constants/constants';
+const OFFSET: string = 'offset';
+const LIMIT: string = 'limit';
+const NOMBRE: string = 'nombre';
 @Component({
   selector: 'app-list-page',
   templateUrl: './list-page.component.html',
   styleUrl: './list-page.component.css'
 })
-export class ListPageComponent implements OnInit, OnDestroy {
+export class ListPageComponent implements OnInit {
 
   // Variables visuales
   public isLoading: boolean = false;
@@ -25,102 +31,103 @@ export class ListPageComponent implements OnInit, OnDestroy {
   // Arreglos
   public currrencies: Currency[] = [];
 
-  //Ruta
-  public rutaActual: Ruta = {
-    modulo: 'currencies',
-    seccion: 'list'
-  }
+
 
   constructor(
-    private router: Router,
     private fb: FormBuilder,
-    protected paginationService: PaginationService,
-    private routerService: RouterService,
-    private currencyService: CurrencyService
+    private currencyService: CurrencyService,
+    private sms: MessageManagerService,
   ) {
 
     this.PaginationForm = this.fb.group({
-      offset: [paginationService.getInitOffset(this.rutaActual.modulo), [Validators.required, Validators.min(0)]],
-      limit: [paginationService.getInitLimit(this.rutaActual.modulo), [Validators.required, Validators.min(1)]],
-      codigoBanco: [''],
+      offset: [0, [Validators.required, Validators.min(0)]],
+      limit: [5, [Validators.required, Validators.min(1)]],
+      nombre: [''],
     })
   }
-  ngOnDestroy(): void {
-    this.routerService.ultimaRuta = this.rutaActual;
-  }
+
   ngOnInit(): void {
-    if (!this.router.url.includes('list')) return;
-    this.isLoading = true;
 
-    this.paginationService.init(this.PaginationForm, this.rutaActual.modulo);
 
-    const { modulo, seccion } = this.routerService.ultimaRuta;
-    //Si viene de la vista info o edit cliente, mantenga la palabra
-    if (modulo === this.rutaActual.modulo && seccion !== this.rutaActual.seccion) {
-      this.PaginationForm.get('codigoBanco')?.setValue(this.paginationService.getPalabra())
+    this.loadCurrencies();
+    this.onChangeLimit();
+  }
+  get limites(): number[] {
+    return [5, 8, 10]
+  }
+  get currentPagination() {
+    const form = this.PaginationForm;
+    return {
+      offset: Number(form.get(OFFSET)?.value),
+      limit: Number(form.get(LIMIT)?.value),
+      nombre: String(form.get(NOMBRE)?.value).length === 0 ? null : form.get(NOMBRE)?.value
     }
-
-    this.getCurrencies();
   }
 
+  loadCurrencies() {
+    const { offset, limit, nombre } = this.currentPagination;
+    this.currencyService.getCurrencies(offset * limit, limit, nombre)
+      .subscribe(res => this.handleResponse(res));
+  }
+  handleResponse({ success: isSuccess, message, value }: CommonResponse<Currency[]>): void {
+    this.isLoading = false;
+    if (!isSuccess) {
+      this.sms.simpleBox({ message, success: isSuccess })
+      return;
+    }
+    this.canPagination = value!.length === this.currentPagination.limit;
+    this.currrencies = value!
 
-  getCurrencies() {
-    const { offset, limit, palabra } = this.paginationService.getParameterPagination();
+  }
 
-    this.currencyService.getCurrencies(offset * limit, limit, palabra)
-      .subscribe(res => {
-        if (!res.success) {
-          this.showMessage({ isSuccess: res.success, message: res.message })
-        }
+  onChangeLimit(): void {
 
-        this.currrencies = res.value!;
-        this.canPagination = this.currrencies.length === limit;
-        this.isLoading = false;
+    this.PaginationForm.get(LIMIT)?.valueChanges
+      .pipe(filter(value => {
+        // if (!value) return false;
+        this.PaginationForm.get(OFFSET)?.setValue(DEFAULT_OFFSET)
+        return value
+      }))
+      .subscribe(() => {
+        this.loadCurrencies();
       })
-  }
-
-
-
-  increaseOffset(number: number) {
-    this.paginationService.setOffset(number);
-    this.getCurrencies();
 
   }
-  decreaseOffset(number: number) {
-    this.paginationService.setOffset(number);
-    this.getCurrencies()
-  }
 
-  //==================================================00
+
+  onIncrease() {
+    this.PaginationForm.get(OFFSET)?.setValue(this.currentPagination.offset + 1);
+    this.loadCurrencies();
+
+  }
+  onDecrease() {
+    this.PaginationForm.get(OFFSET)?.setValue(this.currentPagination.offset - 1);
+    this.loadCurrencies()
+  }
 
   onSearch(event: any): void {
     event.preventDefault();
-    if (this.PaginationForm.invalid) {
-      this.PaginationForm.markAllAsTouched();
-      return;
-    }
-
-    this.paginationService.setOffset(0);
-    this.paginationService.setPalabra(this.getNombreCliente);
-    this.getCurrencies();
-    const { offset, limit, palabra } = this.paginationService.getParameterPagination();
-
-    this.PaginationForm.reset({ offset, limit, codigoBanco: palabra });
+    this.loadCurrencies();
   }
 
+  onDelete(id: string): void {
+    this.sms.confirmBox({})
+      .pipe(
+        switchMap((confirmed) => {
+          if (!confirmed) return of();
+          this.isLoading = true;
+          return this.currencyService.deleteCurrency(id);
+        }),
+        switchMap(({ message, success }) => {
+          this.sms.simpleBox({ message, success });
+          if (!success) {
+            this.isLoading = false;
+            return of();
+          }
+          const { offset, limit, nombre: codigoBanco } = this.currentPagination;
+          return this.currencyService.getCurrencies(offset * limit, limit, codigoBanco);
+        })
+      ).subscribe(res => this.handleResponse(res));
 
-  get getNombreCliente(): string {
-    const value = this.PaginationForm.get('codigoBanco')?.value;
-    return value as string;
-  }
-
-  showMessage(message: Message) {
-
-    this.message = message;
-
-    setTimeout(() => {
-      this.message = null;
-
-    }, 4000);
   }
 }

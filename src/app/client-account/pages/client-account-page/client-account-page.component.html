@@ -1,0 +1,144 @@
+<div *ngIf="!!message" [ngClass]="message.success? 'alert-success ': 'alert-danger'"
+  class="alert text-center w-50 animated-box postion-message" role="alert">
+  {{message.message}}
+</div>
+<app-loading-spinner *ngIf="isLoading" [title]="'Tipo Cambio'"></app-loading-spinner>
+
+
+
+
+<form class="row p-3  justify-content-center" [formGroup]="clientAccountForm" autocomplete="off">
+  <section class=" col-sm-12  col-md-10 col-lg-6 col-xl-6 col-xxl-4  border mt-0 mt-sm-2  rounded p-4 c-caja">
+    <!-- TITULO -->
+    <div class="row mb-4">
+
+      <h2 class="text-center">{{title}} <span class="fw-light">Cuenta Cliente</span> </h2>
+    </div>
+    <!-- CODIGO_CUENTA_CLIENTE -->
+    <div class="mb-3" *ngIf="title !== 'Agregar'">
+      <label class="form-label">Codigo Cuenta Cliente</label>
+      <input type="text" placeholder="Ingrese codigo cuenta cliente" formControlName="codigoCuentaCliente"
+        class="form-control">
+      <span *ngIf="isValidField('codigoCuentaCliente')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoCuentaCliente")}}
+      </span>
+    </div>
+    <!-- BANCOS -->
+    <div class="mb-3">
+      <label class="form-label">Banco</label>
+      <select formControlName="codigoBanco" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un Banco --</option>
+        <option *ngFor="let bank of banks" [value]=bank.codigoBanco>
+          {{bank.nombre}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('codigoBanco')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoBanco")}}
+      </span>
+    </div>
+
+    <!-- MONEDA -->
+    <div class="mb-3">
+      <label class="form-label">Moneda</label>
+      <select formControlName="codigoMoneda" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un banco para asignar la moneda --</option>
+        <option *ngFor="let currency of currencies" [value]=currency.codigoMoneda>
+          {{currency.nombre}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('codigoMoneda')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoMoneda")}}
+      </span>
+    </div>
+
+
+    <!-- CODIGO TIPO CUENTA Cliente -->
+    <div class="mb-3">
+      <label class="form-label">Tipo Cuenta Cliente</label>
+      <select formControlName="codigoTipoCuentaCliente" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un Tipo de Cuenta Cliente --</option>
+        <option *ngFor="let tipoCuentaCliente of typeClientAccount" [value]=tipoCuentaCliente.codigoTipoCuentaCliente>
+          {{tipoCuentaCliente.nombre}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('codigoTipoCuentaCliente')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoTipoCuentaCliente")}}
+      </span>
+    </div>
+    <!-- Clientes -->
+    <div class="mb-3">
+      <label class="form-label">Clientes</label>
+      <select formControlName="codigoCliente" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un Tipo de Cuenta Cliente --</option>
+        <option *ngFor="let client of clients" [value]=client.codigoCliente>
+          Nombre: {{client.nombreCompleto}} | codigo: {{client.codigoCliente}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('codigoCliente')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoCliente")}}
+      </span>
+    </div>
+    <!-- Cuenta Contable -->
+    <div class="mb-3">
+      <label class="form-label">Cuentas Contables</label>
+      <select formControlName="codigoCuentaContable" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione una Cuenta Contable --</option>
+        <option *ngFor="let exchangeRate of cuentasContables" [value]=exchangeRate.codigoCuentaContable>
+          Banco: {{exchangeRate.codigoBanco}}
+          <hr>
+          Codigo: {{exchangeRate.codigoCuentaContable}}
+          <hr>
+          | Descripción: {{exchangeRate.descripcion}}
+        </option>
+      </select>
+
+      <span *ngIf="isValidField('codigoCuentaContable')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoCuentaContable")}}
+      </span>
+    </div>
+
+    <!-- SALDO -->
+    <div class="mb-3">
+      <label class="form-label">Saldo</label>
+      <input type="text" placeholder="Ingrese el saldo de la cuenta" formControlName="saldo" class="form-control">
+      <span *ngIf="isValidField('saldo')" class="form-text text-danger">
+        {{getFieldOfGroupError("saldo")}}
+      </span>
+    </div>
+
+    <!-- DESCRIPCION -->
+    <div class="mb-3">
+      <label class="form-label">Descripción de la cuenta</label>
+      <textarea type="text" placeholder="Ingrese la Descripción de la cuenta" formControlName="descripcion"
+        class="form-control" rows="2" cols="50" style=" max-height: 200px;"></textarea>
+      <span *ngIf="isValidField('descripcion')" class="form-text text-danger">
+        {{getFieldOfGroupError("descripcion")}}
+      </span>
+    </div>
+    <div class="row">
+      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()" class="btn btn-primary text-center"><img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
+    </div>
+
+  </section>
+
+</form>
+
+
+
+<code>
+  <pre>Formulario es valido: {{clientAccountForm.valid| json }}</pre>
+</code>
+<code>
+  <pre>Formulario Tipo Cambio: {{clientAccountForm.value| json }}</pre>
+</code>
+
+
+<code>
+  <pre>current Tipo Cambio: {{currentClientAccount| json }}</pre>
+</code>

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Message } from '../../interfaces/message.interface';
 
 @Component({
   selector: 'app-alert-dialog',
@@ -7,12 +8,10 @@ import { Component, Input } from '@angular/core';
 })
 export class AlertDialogComponent {
   @Input()
-  public title!: string;
-  @Input()
-  public action: 'DELETE' | 'CREATE' | '' = '';
+  public message: Message | null = null;
 
 
-  @Input()
-  public description!: String;
+
+
 
 }

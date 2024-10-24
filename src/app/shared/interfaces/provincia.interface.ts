@@ -7,7 +7,7 @@ export interface Provincia {
 export interface Canton {
   codigoCanton: number;
   nombre: string;
-  distritos: Distrito[];
+  distritos: Distrito[]  ;
 }
 
 export interface Distrito {

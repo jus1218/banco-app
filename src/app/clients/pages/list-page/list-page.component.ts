@@ -1,143 +1,123 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Message } from '../../../shared/interfaces/message.interface';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginationService } from '../../../shared/service/pagination.service';
 import { ClientService } from '../../services/client.service';
-import { Client } from '../../interface/client.interface';
-import { filter, Subscription } from 'rxjs';
+import { Client, CommonResponse } from '../../interface/client.interface';
+import { of, switchMap } from 'rxjs';
 import { RouterService } from '../../../shared/service/router.service';
-import { Ruta } from '../../../shared/interfaces/ultima-ruta.interface';
+import { MessageManagerService } from '../../../shared/service/message-manager.service';
+import { Pagination } from '../../../shared/constants/constants';
 
 @Component({
   selector: 'app-list-page',
   templateUrl: './list-page.component.html',
   styleUrl: './list-page.component.css'
 })
-export class ListPageComponent implements OnInit, OnDestroy {
+export class ListPageComponent implements OnInit {
 
   // Variables visuales
   public isLoading: boolean = false;
   public canPagination: boolean = false;
   public message: Message | null = null;
   // Formulario
-  public PaginationForm: FormGroup;
+  public PaginationForm!: FormGroup;
   // Arreglos
   public clients: Client[] = [];
-  //Suscripciones
-  private clientSubscription!: Subscription;
-  //Ruta
-  public rutaActual: Ruta = {
-    modulo: 'clients',
-    seccion: 'list'
-  }
+
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
     protected paginationService: PaginationService,
     private clientService: ClientService,
-    private routerService: RouterService
+    private routerService: RouterService,
+    private sms: MessageManagerService
   ) {
+    this.initFormValues();
+
+  }
+  initFormValues(): void {
     this.PaginationForm = this.fb.group({
-      offset: [paginationService.getInitOffset(this.rutaActual.modulo), [Validators.required, Validators.min(0)]],
-      limit: [paginationService.getInitLimit(this.rutaActual.modulo), [Validators.required, Validators.min(1)]],
+      offset: [0, [Validators.required, Validators.min(0)]],
+      limit: [5, [Validators.required, Validators.min(1)]],
       nombreCliente: [''],
     })
 
   }
-  ngOnDestroy(): void {
 
-    if (this.clientSubscription) {
-      this.clientSubscription.unsubscribe();
-    }
-
-    this.routerService.ultimaRuta = this.rutaActual;
-  }
   ngOnInit(): void {
-    if (!this.router.url.includes('list')) return;
-    this.isLoading = true;
 
-    this.paginationService.init(this.PaginationForm, this.rutaActual.modulo);
-
-    const { modulo, seccion } = this.routerService.ultimaRuta;
-    //Si viene de la vista info o edit cliente, mantenga la palabra
-    if (modulo === this.rutaActual.modulo && seccion !== this.rutaActual.seccion) {
-      this.PaginationForm.get('nombreCliente')?.setValue(this.paginationService.getPalabra())
-    }
-
-    //Obtenemos los clientes
-    this.getClients();
+    this.loadClients();
   }
 
-  getClients(): void {
+  loadClients(): void {
+    const { offset, limit, nombre } = this.currentPagination;
 
-    const { offset, limit, palabra } = this.paginationService.getParameterPagination();
-
-    this.clientSubscription = this.clientService.getClientes(offset * limit, limit, palabra)
-      .subscribe(res => {
-        if (!res.success) {
-          this.showMessage({ isSuccess: res.success, message: res.message })
-        }
-
-        this.clients = res.value!;
-        this.canPagination = this.clients.length === limit;
-        this.isLoading = false;
-      })
+    this.clientService.getClientes(offset * limit, limit, nombre)
+      .subscribe((res) => this.managerResponse(res))
 
   }
 
-
-  showMessage(message: Message) {
-
-    this.message = message;
-
-    setTimeout(() => {
-      this.message = null;
-
-    }, 4000);
+  onIncrease(): void {
+    this.PaginationForm.get(Pagination.OFFSET)?.setValue(this.currentPagination.offset + 1);
+    this.loadClients();
   }
-
-
-
-  increaseOffset(number: number) {
-    this.paginationService.setOffset(number);
-    this.getClients();
-
+  onDecrease(): void {
+    this.PaginationForm.get(Pagination.OFFSET)?.setValue(this.currentPagination.offset - 1);
+    this.loadClients();
   }
-  decreaseOffset(number: number) {
-    this.paginationService.setOffset(number);
-    this.getClients()
-  }
-
-
-
-  //==================================================================
-
   onSearch(event: any): void {
     event.preventDefault();
-    if (this.PaginationForm.invalid) {
-      this.PaginationForm.markAllAsTouched();
+    this.loadClients();
+  }
+
+
+
+  get currentPagination() {
+    const form = this.PaginationForm;
+    return {
+      offset: Number(form.get(Pagination.OFFSET)?.value),
+      limit: Number(form.get(Pagination.LIMIT)?.value),
+      nombre: form.get('nombreCliente')?.value
+    }
+  }
+
+  onDelete(codigoCliente: number): void {
+    this.sms.confirmBox({})
+      .pipe(
+        switchMap((confirmed) => {
+          if (!confirmed) return of();
+          this.isLoading = true;
+          // Solicitud de eliminacion
+          return this.clientService.deleteClient(codigoCliente);
+        }),
+        switchMap(({ message, success: isSuccess }) => {
+
+          this.sms.simpleBox({ message, success: isSuccess });
+          if (!isSuccess) {
+            this.isLoading = false;
+            return of();
+          }
+
+          const { offset, limit, nombre } = this.currentPagination;
+          return this.clientService.getClientes(offset * limit, limit, nombre)
+        })
+
+      ).subscribe((res) => this.managerResponse(res));
+  }
+
+
+  managerResponse({ message, success: isSuccess, value: banks }: CommonResponse<Client[]>) {
+    if (!isSuccess) {
+      this.sms.simpleBox({ message, success: isSuccess });
+      this.isLoading = false;
       return;
     }
 
-    this.paginationService.setOffset(0);
-    this.paginationService.setPalabra(this.getNombreCliente);
-    this.getClients();
-    const { offset, limit, palabra } = this.paginationService.getParameterPagination();
-
-    this.PaginationForm.reset({ offset, limit, nombreCliente: palabra });
-  }
-
-  get getNombreCliente(): string {
-    const value = this.PaginationForm.get('nombreCliente')?.value;
-    return value as string;
-  }
-  // setNombreCliente(nombreCliente: string): void {
-  //   this.PaginationForm.get('nombreCliente')?.setValue(nombreCliente);
-  // }
-  getOffset() {
-
-    return this.paginationService.getOffsett();
+    this.clients = banks!;
+    this.canPagination = this.clients.length === this.currentPagination.limit;
+    this.isLoading = false;
   }
 }

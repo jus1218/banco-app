@@ -1,190 +1,206 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Canton, Provincia, Provincia2 } from '../../../shared/interfaces/provincia.interface';
-import { concatMap, filter, mergeMap, Observable, of, Subscription, switchMap, tap } from 'rxjs';
-import { Bank, BankCreateUpdate, Distrito, Moneda, Telefono } from '../../interfaces/bank.interface';
+import { Canton, Provincia } from '../../../shared/interfaces/provincia.interface';
+import { filter, switchMap, tap } from 'rxjs';
+import { BankCreateUpdate, Distrito, Moneda } from '../../interfaces/bank.interface';
 import { ValidatorsService } from '../../../shared/service/validator.service';
 import { MessageManagerService } from '../../../shared/service/message-manager.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BanksService } from '../../services/banks.service';
-import { TelefonoService } from '../../../shared/service/telefono.service';
-import { UbicationService } from '../../../shared/service/ubication.service';
-import { ResponseError } from '../../../shared/interfaces/response-error.interface';
-import { CommonResponseV } from '../../../shared/interfaces/common-response.interface';
 import { Message } from '../../../shared/interfaces/message.interface';
-import { RouterService } from '../../../shared/service/router.service';
+import { TitlePage } from '../../../shared/interfaces/title-page.interface';
+import { SelectorService } from '../../../shared/service/selector.service';
+import { CurrentBank } from '../../interfaces/current-bank.interface';
 
 @Component({
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
   styles: ``
 })
-export class RegisterPageComponent implements OnInit, OnDestroy {
-
-
-  public title: 'Agregar' | 'Editar' | 'Ver' = 'Agregar';
-  public bankForm!: FormGroup;
-  private provinciaSubscription!: Subscription;
-  private cantonSubscription!: Subscription;
-  public cantonesByProvincia: Canton[] = [];
-  public distritosByCanton: Distrito[] = [];
-  public monedas: Moneda[] = [];
+export class RegisterPageComponent implements OnInit {
+  // Variables visuales
+  public title: TitlePage = 'Información';
   public isLoading: boolean = false;
+  public canPagination: boolean = false;
   public message: Message | null = null;
 
-  public provinciasCantonesyDistritos: Provincia2 | undefined;
+  //Arreglos y obj seleccionados
+  public provincias: Provincia[] = [];
+  public cantones: Canton[] = [];
+  public distritos: Distrito[] = [];
+  public monedas: Moneda[] = [];
 
-  public newPhone!: FormControl;
+  // Formulario
+  public bankForm!: FormGroup;
+
+  //Otros
+  public provinciaSelected?: Provincia;
+  public cantonSelected?: Canton;
 
   constructor(
     private fb: FormBuilder,
-    private ubicationService: UbicationService,
     private validatorsService: ValidatorsService,
     private messageManagerService: MessageManagerService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private banksService: BanksService,
-    private telefonoService: TelefonoService,
-    private routerService: RouterService
+    private selectorService: SelectorService,
+
   ) {
-    this.initValues();
-
-
+    this.initValuesForm();
   }
 
-  initValues() {
-
-    this.newPhone = new FormControl<String>('', this.validatorsService.phoneIsValid);
-
+  initValuesForm(): void {
     this.bankForm = this.fb.group({
       codigoBanco: ['', [Validators.required, Validators.maxLength(3), Validators.minLength(1)],],
-      codigoMoneda: ['', [Validators.required, Validators.min(1)],],
       nombre: ['', [Validators.required, Validators.maxLength(20)]],
+      codigoMoneda: ['', [Validators.required, Validators.min(1)],],
+      codigoDistrito: [0, [Validators.required, Validators.min(1)]],
       direccionExacta: ['', [Validators.required, Validators.maxLength(254)]],
+      //Adicionales
       codigoProvincia: [0, [Validators.required, Validators.min(1)]],
-      canton: [0, [Validators.required, Validators.min(1)]],
-      codigoDistrito: new FormControl<number>(0, [Validators.required, Validators.min(1)]),
+      codigoCanton: [0, [Validators.required, Validators.min(1)]],
       telefonos: this.fb.array([])
-    })
-
-    this.banksService.getMonedas().subscribe(res => {
-      if (!res.success) {
-        this.showMessage('Recargue la pagina nuevamente', res.success);
-        this.router.navigate(['/banks/list']);
-        return
-      }
-      this.monedas = res.value!
-    })
+    });
   }
 
 
   ngOnInit(): void {
+    this.configureFormByRoute();
     this.onProvinciaChanged();
     this.onCantonChanged();
-    if (this.router.url.includes('list')) return;
-    if (this.router.url.includes('register')) return;
+  }
+  configureFormByRoute(): void {
+    if (this.router.url.includes('register')) {
+      this.title = 'Agregar'
+      this.loadDataSelector();
+
+      return;
+    }
+    if (this.router.url.includes('edit')) {
+      this.title = 'Editar'
+      this.bankForm.get('codigoBanco')?.disable();
+    } else {
+      this.bankForm.disable();
+    }
+    this.loadBank();
+  }
+
+
+  loadDataSelector(): void {
+
+    this.selectorService.getAll().subscribe(({ message, success: isSuccess, value }) => {
+
+      if (!isSuccess) {
+        this.messageManagerService.simpleBox({ message, success: isSuccess })
+        this.isLoading = false;
+        this.router.navigate(['/banks/list']);
+      }
+      this.monedas = value?.monedas!;
+      this.provincias = value?.provincias!;
+
+    });
+
+  }
+
+  loadBank(): void {
 
     this.isLoading = true;
 
-    this.activatedRoute.params
-      .pipe(
-        switchMap(({ id }) => this.banksService.getBanco(id)),//obtenemos el banco
-        filter(banco => !!banco),//validamos que no sea nulo o undefined
-        tap(banco => {
-          // desabilitamos y setteamos los campos del formulario
-          if (!this.router.url.includes('edit')) {
-            this.title = 'Ver';
-            this.bankForm.disable();
-          } else {
+    this.activatedRoute.params.pipe(
+      switchMap((id) => this.selectorService.getAll()
+        .pipe(switchMap(({ message, success: isSuccess, value }) => {
 
-            this.bankForm.get('codigoBanco')?.disable();
-            this.title = 'Editar';
+          if (!isSuccess) {
+            this.messageManagerService.simpleBox({ message, success: isSuccess })
+            this.isLoading = false;
+            this.router.navigate(['/banks/list']);
+
+            return this.banksService.getBanco(id['id']);
           }
-          this.bankForm.reset(banco);
 
-          this.provinciasCantonesyDistritos = this.ubicationService.getProvinciaCantonbyIdDistrito(banco.codigoDistrito);
-          if (!this.provinciasCantonesyDistritos) return;
-          this.bankForm.get('codigoProvincia')?.setValue(this.provinciasCantonesyDistritos?.codigoProvincia);
-          this.cantonesByProvincia = this.ubicationService.getCantones(this.provinciasCantonesyDistritos!.codigoProvincia);
-          this.bankForm.get('canton')?.setValue(this.provinciasCantonesyDistritos?.canton.codigoCanton);
-          this.distritosByCanton = this.ubicationService.getDistritos(this.provinciasCantonesyDistritos!.canton.codigoCanton);
-          this.bankForm.get('codigoDistrito')?.setValue(this.provinciasCantonesyDistritos?.canton.distrito.codigoDistrito);
-        }),
-
-      ).subscribe(banco => {
-
-        this.banksService.getPhonesByCodeBank(banco.codigoBanco)
-          .subscribe(res => this.onAddPhones(res.value!));
-
+          this.monedas = value?.monedas!;
+          this.provincias = value?.provincias!;
+          return this.banksService.getBanco(id['id']);
+        }))),
+    ).subscribe(({ message, success: isSuccess, value }) => {
+      if (!isSuccess) {
+        this.messageManagerService.simpleBox({ message, success: isSuccess })
         this.isLoading = false;
-      });
+        this.router.navigate(['/banks/list']);
+        return;
+      }
 
+
+      this.bankForm.reset({ ...value });
+      const provincia = this.provincias.find(p => p.cantones.find(c => c.distritos.find(d => d.codigoDistrito === value?.codigoDistrito)));
+      const canton = provincia?.cantones.find(c => c.distritos.find(d => d.codigoDistrito === value?.codigoDistrito));
+
+      this.bankForm.get('codigoProvincia')?.setValue(provincia?.codigoProvincia);
+      this.findCantons(provincia!.codigoProvincia);
+      this.bankForm.get('codigoCanton')?.setValue(canton?.codigoCanton);
+      this.findDistricts(canton!.codigoCanton);
+      this.bankForm.get('codigoDistrito')?.setValue(value?.codigoDistrito);
+
+      this.isLoading = false;
+    })
   }
 
-  ngOnDestroy(): void {
-    if (this.provinciaSubscription) {
-      this.provinciaSubscription.unsubscribe();
-    }
-    if (this.cantonSubscription) {
-      this.cantonSubscription.unsubscribe();
-    }
-
-    this.routerService.ultimaRuta = { modulo: "banks", seccion: 'view' };
-  }
-
-  get provincias(): Provincia[] {
-    return this.ubicationService.getProvincias;
-  }
 
   onProvinciaChanged() {
-    this.provinciaSubscription = this.bankForm.get('codigoProvincia')!.valueChanges
+    this.bankForm.get('codigoProvincia')!.valueChanges
       .pipe(
-        tap(() => this.bankForm.get("canton")!.setValue(0)),
-        tap(() => this.cantonesByProvincia = []),
+        tap(() => this.bankForm.get("codigoCanton")!.setValue(0)),
+        tap(() => this.cantones = []),
         filter(value => {
           if (!value) return false;
           return value.length > 0
         })//evita que se haga llamados si el valor es vacio
       )
-      .subscribe(idProvincia => {
+      .subscribe(idProvincia => this.findCantons(idProvincia));
+  }
 
-        const id = idProvincia as number;
+  findCantons(idProvincia: number): void {
+    const cantones = this.provincias.find(p => p.codigoProvincia === Number(idProvincia))?.cantones;
+    if (!cantones) {
+      this.cantones = [];
+      return;
+    }
+    this.cantones = cantones;
 
-        this.cantonesByProvincia = this.ubicationService.getCantones(id);
-      })
+  }
+  findDistricts(idCanton: number): void {
+    const distritos = this.cantones.find(c => c.codigoCanton === Number(idCanton))?.distritos;
+    if (!distritos) {
+      this.distritos = [];
+      return;
+    }
+    this.distritos = distritos;
+
   }
   onCantonChanged() {
-    this.cantonSubscription = this.bankForm.get('canton')!.valueChanges
+    this.bankForm.get('codigoCanton')!.valueChanges
       .pipe(
-        tap(() => this.bankForm.get("codigoDistrito")!.setValue(0)),
-        tap(() => this.distritosByCanton = []),
+        tap(() => this.bankForm.get('codigoDistrito')!.setValue(0)),
+        tap(() => this.distritos = []),
         filter(value => {
           if (!value) return false;
           return value.length > 0
         })//evita que se haga llamados si el valor es vacio
       )
-      .subscribe(idCanton => {
-
-        console.log("idprovincia: " + !idCanton);
-        const id = idCanton as number;
-        this.distritosByCanton = this.ubicationService.getDistritos(id)
-      })
+      .subscribe(idCanton => this.findDistricts(idCanton));
   }
+
   isValidField(field: string) {
     return this.validatorsService.isValidField(this.bankForm, field);
   }
-  isValidFormControl() {
-    return this.validatorsService.isValidFormControl(this.newPhone);
-  }
+
 
   getFieldOfGroupError(field: string) {
     const message = this.messageManagerService.getFieldOfGroupError(field, this.bankForm);
     return message;
   }
-  getFormControlError() {
-    const message = this.messageManagerService.getFieldOfControlError(this.newPhone);
-    return message;
-  }
+
 
 
 
@@ -193,9 +209,16 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
   }
 
 
-  get currentBank(): BankCreateUpdate {
-    const banco = this.bankForm.value as BankCreateUpdate;
-    return banco;
+  get currentBank(): CurrentBank {
+    const form = this.bankForm;
+    return {
+      ...form.value,
+      codigoBanco: String(form.get('codigoBanco')?.value).toUpperCase(),
+      codigoProvincia: Number(form.get('codigoProvincia')?.value),
+      codigoDistrito: Number(form.get('codigoDistrito')?.value),
+      codigoCanton: Number(form.get('codigoCanton')?.value),
+
+    };
   }
   get telefonos() {
     return this.bankForm.get('telefonos') as FormArray;
@@ -207,94 +230,103 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log(this.currentBank);
-
     if (this.title === "Editar") {
 
-      this.banksService.updateBanco(
-        {
-          ...this.currentBank,
-          codigoDistrito: Number(this.currentBank.codigoDistrito),
-          codigoBanco: this.bankForm.get('codigoBanco')!.value as string
-        }
-      ).subscribe(res => this.showMessage(res.message, res.success))
+      this.banksService.updateBanco(this.currentBank)
+        .subscribe(({ message, success: isSuccess }) => {
+          this.messageManagerService.simpleBox({ message, success: isSuccess })
+          this.isLoading = false;
+        });
       return;
     }
 
-    this.banksService.createBanco(this.currentBank).subscribe(res => {
-      this.showMessage(res.message, res.success);
-      if (!res.success) return;
 
-      this.bankForm.reset({});
+
+    this.banksService.createBanco(this.currentBank).subscribe(({ message, success: isSuccess }) => {
+      this.messageManagerService.simpleBox({ message, success: isSuccess })
+      if (!isSuccess) return;
+      this.bankForm.reset({
+        codigoBanco: "",
+        nombre: "",
+        codigoMoneda: "",
+        codigoDistrito: 0,
+        direccionExacta: "",
+        codigoProvincia: 0,
+        codigoCanton: 0,
+      });
     });
   }
 
-  onDeletePhone(index: number): void {
-    const numero = this.telefonos.at(index).value as string;
-    this.telefonoService.deletePhone(numero).subscribe(res => {
-      this.telefonos.removeAt(index);
-      this.showMessage(res.message, res.success);
-
-    })
-  }
-  onEditPhone(index: number): void {
-    const numero = this.telefonos.at(index).value as string;
-    this.telefonoService.editPhone(
-      {
-        numero,
-        codigoBanco: this.bankForm.get('codigoBanco')!.value as String,
-        codigoCliente: null
-      }).subscribe((res: CommonResponseV<String> | ResponseError) => {
-
-
-
-      })
+  get banco(): BankCreateUpdate {
+    const { codigoBanco, codigoDistrito, codigoMoneda, direccionExacta, nombre } = this.currentBank;
+    return {
+      codigoBanco, codigoDistrito, codigoMoneda, direccionExacta, nombre
+    };
   }
 
 
-  onAddPhones(telefonos: Telefono[]): void {
-
-    if (!telefonos) return;
-    telefonos.forEach(telefono => {
-      this.telefonos.push(new FormControl<String>(telefono.numero, this.validatorsService.phoneIsValid));
-    });
-
-  }
-
-  onAddPhone(): void {
-    if (this.newPhone.invalid) return;
-
-    const newNumberPhone = this.newPhone.value;
-
-    this.telefonoService.createPhoneBank(
-      {
-        numero: newNumberPhone,
-        codigoBanco: this.bankForm.get('codigoBanco')!.value as string,
-        codigoTelefono: null,
-        codigoCliente: null
-      }).subscribe(res => {
-        this.showMessage(res.message, res.success);
-        if (!res.success) return;
 
 
-        this.telefonos.push(this.fb.control(res.value!.numero, this.validatorsService.phoneIsValid));
-        this.newPhone.reset('');
-      })
-  }
+  // onDeletePhone(index: number): void {
+  //   const numero = this.telefonos.at(index).value as string;
+  //   this.telefonoService.deletePhone(numero).subscribe(res => {
+  //     this.telefonos.removeAt(index);
+  //     // this.showMessage(res.message, res.success);
 
-  showMessage(message: string, isSuccess: boolean) {
-    this.message = { message, isSuccess };
-    setTimeout(() => {
-      this.message = null;
-    }, 4000);
-  }
-  isTouched(index: number): boolean {
-    return this.validatorsService.istouchedFieldInArray(this.telefonos, index);
-  }
+  //   })
+  // }
+  // onEditPhone(index: number): void {
+  //   const numero = this.telefonos.at(index).value as string;
+  //   this.telefonoService.editPhone(
+  //     {
+  //       numero,
+  //       codigoBanco: this.bankForm.get('codigoBanco')!.value as String,
+  //       codigoCliente: null
+  //     }).subscribe((res: CommonResponseV<String> | ResponseError) => {
 
 
-  isEdit() {
-    return this.title === 'Editar';
-  }
+
+  //     })
+  // }
+
+
+  // onAddPhones(telefonos: Telefono[]): void {
+
+  //   if (!telefonos) return;
+  //   telefonos.forEach(telefono => {
+  //     this.telefonos.push(new FormControl<String>(telefono.numero, this.validatorsService.phoneIsValid));
+  //   });
+
+  // }
+
+  // onAddPhone(): void {
+  //   if (this.newPhone.invalid) return;
+
+  //   const newNumberPhone = this.newPhone.value;
+
+  //   this.telefonoService.createPhoneBank(
+  //     {
+  //       numero: newNumberPhone,
+  //       codigoBanco: this.bankForm.get('codigoBanco')!.value as string,
+  //       codigoTelefono: null,
+  //       codigoCliente: null
+  //     }).subscribe(res => {
+  //       // this.showMessage(res.message, res.success);
+  //       if (!res.success) return;
+
+
+  //       this.telefonos.push(this.fb.control(res.value!.numero, this.validatorsService.phoneIsValid));
+  //       this.newPhone.reset('');
+  //     })
+  // }
+
+
+  // isTouched(index: number): boolean {
+  //   return this.validatorsService.istouchedFieldInArray(this.telefonos, index);
+  // }
+
+
 
 }
+
+

@@ -1,13 +1,13 @@
 <app-loading-spinner *ngIf="isLoading" [title]="'Tipos de cambios'"></app-loading-spinner>
 
-<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
+<div *ngIf="!!message" [ngClass]="message.success? 'alert-success ': 'alert-danger'"
   class="alert text-center w-50 animated-box postion-message" role="alert">
   {{message.message}}
 </div>
 
 
 
-<form [formGroup]="PaginationForm" autocomplete="off" class="col  ">
+<form [formGroup]="paginationForm" autocomplete="off" class="col  ">
 
   <section class="row justify-content-center ">
     <div class="col-100 col-sm-100 col-md-6 col-lg-4 col-xl-3 col-xxl-2"><button class="btn btn-success w-100 "
@@ -99,62 +99,81 @@
   </nav>
 
 </section>
-<table class="table rounded  ">
-  <thead>
-    <tr>
-      <th>Codigo Moneda</th>
-      <th>Codigo Banco</th>
-      <th>Fecha</th>
-      <th>Tipo Cambio Compra</th>
-      <th>Tipo Cambio Venta</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody *ngFor="let currency of exchangeRates">
-    <tr>
-      <th class="table-active" scope="row">{{currency.codigoMoneda}}</th>
-      <td class="table-active" colspan="1">{{currency.codigoBanco}}</td>
-      <td class="table-active" colspan="1">{{currency.fecha.toString() | dateFormart}}</td>
-      <td class="table-active" colspan="1">{{currency.tipoCambioCompra | currencyFormat: currency.codigoMoneda}}</td>
-      <td class="table-active" colspan="1">{{currency.tipoCambioVenta | currencyFormat: currency.codigoMoneda}}</td>
-
-      <!-- <td class="table-active">{{client.telefono}}</td> -->
-
-      <td class="table-active">
-        <!-- <button [routerLink]="['/exchange-rates', [ currency.codigoMoneda,currency.fecha,currency.codigoBanco]]" type="button"
-          class="btn btn-primary me-1">Ver</button> -->
-          <button [routerLink]="['/exchange-rates', currency.codigoMoneda, currency.fecha, currency.codigoBanco]" type="button" class="btn btn-primary me-1">Ver</button>
-          <button [routerLink]="['/exchange-rates/edit/', currency.codigoMoneda, currency.fecha, currency.codigoBanco]" type="button" class="btn  btn-warning me-1">Editar</button>
-
-        <!-- <button [routerLink]="['',[ currency.codigoMoneda,currency.fecha,currency.codigoBanco]]"
-          type="button" class="btn btn-warning me-1">Editar</button> -->
-<!-- (click)="setDelete(currency)" data-bs-toggle="modal" data-bs-target="#exampleModal"-->
-
-        <button type="button" class="btn btn-danger" (click)="deleteExchangeRate(currency)">
-          Eliminar
-        </button>
-
-      </td>
-    </tr>
-  </tbody>
-  <tbody *ngIf="exchangeRates.length===0 && !isLoading" class="bg-warning  ">
-    <tr>
-      <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
-
-    </tr>
-  </tbody>
-</table>
 
 
-<div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
+
+
+
+
+
+<section class="row px-4 py-3 ">
+  <table class=" table table-striped  table-hover   ">
+    <thead class="">
+      <tr class="text-center">
+        <th>Codigo Moneda</th>
+        <th>Codigo Banco</th>
+        <th>Fecha</th>
+        <th>Tipo Cambio Compra</th>
+        <th>Tipo Cambio Venta</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let exchageRate of exchangeRates">
+      <tr class="text-center">
+        <th scope="row">{{exchageRate.codigoMoneda}}</th>
+        <td colspan="1">{{exchageRate.codigoBanco}}</td>
+        <td colspan="1">{{exchageRate.fecha.toString() | dateFormart}}</td>
+        <td colspan="1">{{exchageRate.tipoCambioCompra | currencyFormat: exchageRate.codigoMoneda}}</td>
+        <td colspan="1">{{exchageRate.tipoCambioVenta | currencyFormat: exchageRate.codigoMoneda}}</td>
+
+
+
+
+        <td>
+          <button
+            [routerLink]="['/exchange-rates', exchageRate.codigoMoneda, exchageRate.fecha, exchageRate.codigoBanco]"
+            type="button" class="btn btn-primary  me-1 me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0  mt-lg-1">
+            <img src="assets/view.svg">
+          </button>
+          <button
+            [routerLink]="['/exchange-rates/edit/', exchageRate.codigoMoneda, exchageRate.fecha, exchageRate.codigoBanco]"
+            type="button" class="btn  btn-secondary  me-1 me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0  mt-lg-1">
+            <img src="assets/edit.svg">
+          </button>
+          <button type="button" class="btn btn-danger me-1 me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0  mt-lg-1"
+            (click)="deleteExchangeRate(exchageRate)">
+
+            <img src="assets/delete.svg">
+
+          </button>
+        </td>
+      </tr>
+
+    </tbody>
+    <tbody *ngIf="exchangeRates.length===0 && !isLoading" class="bg-warning  ">
+      <tr>
+        <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
+
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+
+
+
+
+
+<!-- <div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
   <h3>Vista Previa</h3>
   <code>
-      <pre>Es valido: {{ PaginationForm.valid| json }}</pre>
+      <pre>Es valido: {{ paginationForm.valid| json }}</pre>
     </code>
   <code>
-      <pre>Datos: {{ PaginationForm.value| json }}</pre>
+      <pre>Datos: {{ paginationForm.value| json }}</pre>
     </code>
-</div>
-<app-alert-dialog title="Eliminar tipo de cambio" description="¿Estas seguro que deseas eliminar este tipo de cambio?"
-  action="DELETE"></app-alert-dialog>
-<!-- Button trigger modal -->
+  <code>
+      <pre>Datos: {{ currentPagination | json }}</pre>
+    </code>
+</div> -->

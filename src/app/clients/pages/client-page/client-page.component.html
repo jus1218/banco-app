@@ -1,63 +1,64 @@
-<div *ngIf="!!message" [ngClass]="message.isSuccess? 'alert-success ': 'alert-danger'"
-  class="alert text-center w-50 animated-box postion-message" role="alert">
-  {{message.message}}
-</div>
 <app-loading-spinner *ngIf="isLoading" [title]="'Cliente'"></app-loading-spinner>
+<app-alert-dialog [message]="message"></app-alert-dialog>
 
 
-<form class="row p-3  justify-content-center" [formGroup]="clientForm" autocomplete="off">
+<form class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-2 p-3  justify-content-center"
+  [formGroup]="clientForm" autocomplete="off">
 
 
-  <section class=" col-sm-12  col-md-4 border mt-0 mt-sm-2  rounded p-4 c-caja">
+  <div class="col  border rounded mt-0 mt-sm-2   p-4 c-caja">
 
-    <div class="row mb-2">
 
-      <h2 class="text-center">{{title}} Cliente</h2>
+    <!-- TITULO -->
+    <div class="row mb-4">
+
+      <h2 class="text-center">{{title}} <span class="fw-light">Cliente</span> </h2>
     </div>
 
+    <!-- CODIGO_CLIENTE -->
+    <div class="mb-3" *ngIf="title !== 'Agregar'">
+      <label class="form-label">Codigo Cliente</label>
+      <input type="text" placeholder="Ingrese codigo banco" formControlName="codigoCliente" class="form-control">
+      <span *ngIf="isValidField('codigoCliente')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoCliente")}}
+      </span>
+    </div>
+
+    <!-- NOMBRE_BANCO -->
     <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input type="text" placeholder="Ingrese el nombre del cliente" formControlName="nombre" class="form-control">
+      <label class="form-label">Nombre Cliente</label>
+      <input type="text" placeholder="Ingrese el nombre" formControlName="nombre" class="form-control">
       <span *ngIf="isValidField('nombre')" class="form-text text-danger">
         {{getFieldOfGroupError("nombre")}}
       </span>
     </div>
+    <!-- PRIMER_APELLIDO -->
     <div class="mb-3">
-      <label class="form-label">Primer apellido</label>
-      <input type="text" placeholder="Ingrese el primer apellido del cliente" formControlName="primerApellido"
-        class="form-control">
+      <label class="form-label">Primer Apellido</label>
+      <input type="text" placeholder="Ingrese el primer apellido" formControlName="primerApellido" class="form-control">
       <span *ngIf="isValidField('primerApellido')" class="form-text text-danger">
         {{getFieldOfGroupError("primerApellido")}}
       </span>
     </div>
+    <!-- SEGUNDO_APELLIDO -->
     <div class="mb-3">
-      <label class="form-label">Segundo apellido</label>
-      <input type="text" placeholder="Ingrese el segundo apellido del cliente" formControlName="segundoApellido"
+      <label class="form-label">Segundo Apellido</label>
+      <input type="text" placeholder="Ingrese el segundo apellido" formControlName="segundoApellido"
         class="form-control">
       <span *ngIf="isValidField('segundoApellido')" class="form-text text-danger">
         {{getFieldOfGroupError("segundoApellido")}}
       </span>
     </div>
+    <!-- CEDULA -->
     <div class="mb-3">
       <label class="form-label">Cedula</label>
-      <input type="text" placeholder="Ingrese el segundo apellido del cliente" formControlName="cedula"
-        class="form-control">
+      <input type="text" placeholder="Ingrese el primer apellido" formControlName="cedula" class="form-control">
       <span *ngIf="isValidField('cedula')" class="form-text text-danger">
         {{getFieldOfGroupError("cedula")}}
       </span>
     </div>
-    <!-- DIRECCION EXACTA -->
 
-    <div class="mb-3">
-      <label class="form-label">Direccion Exacta</label>
-      <textarea type="text" placeholder="Ingrese la direccion exacta del cliente" formControlName="direccionExacta"
-        class="form-control" rows="2" cols="50" style=" max-height: 200px;"></textarea>
-      <span *ngIf="isValidField('direccionExacta')" class="form-text text-danger">
-        {{getFieldOfGroupError("direccionExacta")}}
-      </span>
-    </div>
-
-    <!-- PROVINCIA -->
+    <!-- PROVINCIAS -->
     <div class="mb-3">
       <select formControlName="codigoProvincia" class="form-select" aria-label="Default select example">
         <option selected value=0 class="text-center">-- Seleccione una Provincia --</option>
@@ -70,11 +71,11 @@
       </span>
     </div>
 
-    <!-- CANTON -->
-    <div class="mb-3">
+    <!-- Cantones -->
+    <div class="mb-3" *ngIf="cantones.length>0">
       <select formControlName="codigoCanton" class="form-select" aria-label="Default select example">
-        <option selected value=0 class="text-center">-- Seleccione un Canton --</option>
-        <option *ngFor="let canton of cantonesByProvincia" [value]=canton.codigoCanton>
+        <option selected value=0 class="text-center">-- Seleccione un canton --</option>
+        <option *ngFor="let canton of cantones" [value]=canton.codigoCanton>
           {{canton.nombre}}
         </option>
       </select>
@@ -82,103 +83,48 @@
         {{getFieldOfGroupError("codigoCanton")}}
       </span>
     </div>
-
-    <!-- DISTRITO -->
-    <div class="mb-3">
+    <!-- Distritos -->
+    <div class="mb-3" *ngIf="distritos.length>0">
       <select formControlName="codigoDistrito" class="form-select" aria-label="Default select example">
-        <option selected class="text-center" value=0>-- Seleccione un Distrito --</option>
-        <option *ngFor="let distrito of distritosByCanton" [value]=distrito.codigoDistrito>
+        <option selected value=0 class="text-center">-- Seleccione un distrito --</option>
+        <option *ngFor="let distrito of distritos" [value]=distrito.codigoDistrito>
           {{distrito.nombre}}
         </option>
       </select>
-
       <span *ngIf="isValidField('codigoDistrito')" class="form-text text-danger">
         {{getFieldOfGroupError("codigoDistrito")}}
       </span>
     </div>
 
+    <!-- DIRECCION EXACTA -->
+
+    <div class="mb-3">
+      <label class="form-label">Direccion Exacta</label>
+      <textarea type="text" placeholder="Ingrese la direccion exacta del cliente" formControlName="direccionExacta"
+        class="form-control" rows="2" cols="50" style=" max-height: 200px;"></textarea>
+      <span *ngIf="isValidField('direccionExacta')" class="form-text text-danger">
+        {{getFieldOfGroupError("direccionExacta")}}
+      </span>
+    </div>
 
 
-    <div class="row justify-content-center ">
+    <div class="row">
       <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
-        class="btn btn-primary text-center">{{title}}</button>
-    </div>
-  </section>
-  <div *ngIf="title!=='Agregar'"
-    class=" col-sm-12  col-md-6 border mt-0 mt-sm-2 border   ms-0 ms-md-2  rounded p-4 c-caja">
-
-    <div class="row mb-2 ">
-
-      <h2 class="text-center">Numeros de telefonos</h2>
-    </div>
-    <div class="mb-3 row  justify-content-center">
-      <div class="col-sm-9 mt-2 mb-4 ">
-        <div *ngIf="title!=='Información'" class="mb-1">
-          <label class="col-sm-12 col-form-label">Agregar telefonos </label>
-          <div class="input-group">
-            <input type="text" [formControl]="newPhone" placeholder="Ingrese un nuevo numero de telefono"
-              class="form-control">
-            <button class="btn btn-outline-success" (click)="onAddPhone()" type="button">
-              Agregar
-            </button>
-
-          </div>
-          <span *ngIf="isValidFormControl()" class="form-text text-danger">
-            {{getFormControlError()}}
-          </span>
-
-
-        </div>
-      </div>
-
-
-      <div class="col-sm-9 mt-2 " formArrayName="telefonos">
-
-        <ul class="list-group  ">
-          <li class="list-group-item d-flex justify-content-between align-items-center"
-            *ngFor="let telefono of telefonos.controls; let i = index">
-
-            <p>N°{{i+1}} Telefono: <span class="text-secondary"> {{telefono.value}}</span></p>
-
-            <!--   -->
-            <button class="btn btn-outline-danger" *ngIf="title!=='Información'" (click)="onDeletePhone(i)"
-              type="button">
-              Eliminar
-            </button>
-          </li>
-
-
-        </ul>
-      </div>
-
-
-
+        class="btn btn-primary text-center d-flex justify-content-center"> <img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
     </div>
   </div>
-
-  <div class="col-sm-12 col-md-4 mt-0 mt-sm-2   me-0 me-md-2 border rounded p-4 c-caja">
-    <h3>Vista Previa</h3>
-    <hr>
-    <code>
-        <pre>Todos validos: {{ clientForm.valid| json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Todos tocados: {{ clientForm.touched | json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Formulario Cliente: {{ clientForm.value| json }}</pre>
-      </code>
-    <hr>
-    <code>
-        <pre>Nuevo Telefono: {{ newPhone.value| json }}</pre>
-    </code>
-    <hr>
-    <code>
-        <pre>Cliente: {{ currentClient| json }}</pre>
-    </code>
-  </div>
-
-
 </form>
+
+<!-- <code>
+    <pre>Formulario es valido: {{clientForm.valid| json }}</pre>
+</code>
+<code>
+    <pre>Formulario Tipo Cambio: {{clientForm.value| json }}</pre>
+</code>
+
+
+<code>
+    <pre>current Tipo Cambio: {{currentClient| json }}</pre>
+</code> -->

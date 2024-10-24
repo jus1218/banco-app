@@ -1,19 +1,25 @@
+import { Observable, Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Message } from '../interfaces/message.interface';
-
+import Swal from 'sweetalert2';
+import { buildMessage, MessageSweetAlert, TITLE_M } from '../interfaces/message-sweet-alert.interface';
 @Injectable({
   providedIn: 'root'
 })
 export class MessageManagerService {
+
+  // private confirmSubject: Subject<boolean> = new Subject<boolean>();
 
   constructor() { }
 
 
   getFieldOfGroupError(field: string, myForm: FormGroup): string | null {
 
+    // const msg = '/^[0-9]+$/' === errors['pattern'].requiredPattern ? 'Ingrese solo numeros' : '';
     if (!myForm.controls[field]) return null;
     const errors = myForm.controls[field].errors || {};
+
 
     for (const key of Object.keys(errors)) {
       switch (key) {
@@ -68,9 +74,45 @@ export class MessageManagerService {
   showMessage(messageRef: { message: Message | null }) {
     setTimeout(() => {
       messageRef.message = {
-        message: "ds", isSuccess: false
+        message: "ds", success: false
       };
     }, 4000);
+  }
+
+
+  confirmBox(
+    messages: MessageSweetAlert): Observable<boolean> {
+
+    const { title, message, icon, confirmButtonText, cancelButtonText } = buildMessage(messages);
+    // Creamos un nuevo Subject en cada llamado para evitar duplicados
+    const confirmSubject = new Subject<boolean>();
+    Swal.fire({
+      title: title,
+      text: message,
+      icon: icon,
+      showCancelButton: true,
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButtonText
+    }).then((result) => {
+      if (result.value) {
+        confirmSubject.next(true);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        confirmSubject.next(false);
+      }
+
+      confirmSubject.complete();
+    });
+
+    return confirmSubject.asObservable();
+  }
+
+
+  simpleBox({ title, message, success: isSuccess }: Message): void {
+    Swal.fire(
+      title,
+      message,
+      isSuccess ? 'success' : 'error'
+    )
   }
 
 }

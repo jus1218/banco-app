@@ -1,4 +1,5 @@
 export interface Message {
-  message: String,
-  isSuccess: boolean
+  title?:string
+  message: string,
+  success: boolean
 }

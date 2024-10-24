@@ -1,4 +1,4 @@
-<!-- Modal -->
+<!-- Modal
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -18,4 +18,8 @@
       </div>
     </div>
   </div>
+</div> -->
+<div *ngIf="!!message" [ngClass]="message.success? 'alert-success ': 'alert-danger'"
+  class="alert text-center w-50 animated-box postion-message" role="alert">
+  {{message.message}}
 </div>

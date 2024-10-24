@@ -3,6 +3,7 @@ import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environments } from '../../../environments/environments';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Client, ClienteCreateUpdate, ClienteInfo, CommonResponse } from '../interface/client.interface';
+import { HelperService } from '../../shared/service/helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class ClientService {
 
   private baseUrl: String = environments.baseUrl + '/clientes';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private helperService: HelperService) { }
 
   getClientes(offset: number, limit: number, nombre: string | null): Observable<CommonResponse<Client[]>> {
 
@@ -23,15 +24,7 @@ export class ClientService {
 
     return this.http.get<CommonResponse<Client[]>>(`${this.baseUrl}`, { params })
       .pipe(
-
-        catchError(err => {
-          const message: CommonResponse<Client[]> = {
-            value: [],
-            message: err.error.detail,
-            success: false
-          }
-          return of(message);
-        })
+        catchError(err => this.helperService.catchErrorP2<Client[]>(err))
       );
   }
 
@@ -76,6 +69,15 @@ export class ClientService {
       .pipe(
         catchError(err => this.catchErrorP(err.error.detail))
       );
+  }
+
+
+  deleteClient(id: number): Observable<CommonResponse<ClienteInfo>> {
+
+    return this.http.delete<CommonResponse<ClienteInfo>>(`${this.baseUrl}/${id}`)
+      .pipe(
+        catchError(err => this.helperService.catchErrorP2<ClienteInfo>(err))
+      )
   }
 
 

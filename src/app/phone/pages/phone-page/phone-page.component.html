@@ -1,0 +1,55 @@
+<app-loading-spinner *ngIf="isLoading" [title]="'Telefono'"></app-loading-spinner>
+<app-alert-dialog [message]="message"></app-alert-dialog>
+
+
+<form class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-2 p-3  justify-content-center"
+  [formGroup]="phoneForm" autocomplete="off">
+
+  <div class="col  border rounded mt-0 mt-sm-2   p-4 c-caja">
+    <!-- TITULO -->
+    <div class="row mb-4">
+
+      <h2 class="text-center">{{title}} <span class="fw-light">Telefono</span> </h2>
+    </div>
+
+    <!-- codigo telefono -->
+    <div class="mb-3" *ngIf="title !== 'Agregar'">
+      <label class="form-label">Codigo Telefono</label>
+      <input type="text" placeholder="Ingrese codigo telefono" formControlName="codigoTelefono" class="form-control">
+      <span *ngIf="isValidField('codigoTelefono')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoTelefono")}}
+      </span>
+    </div>
+    <!-- Numero telefono -->
+    <div class="mb-3">
+      <label class="form-label">Numero telefono</label>
+      <input type="text" placeholder="Ingrese el numero telefono" formControlName="numero" class="form-control">
+      <span *ngIf="isValidField('numero')" class="form-text text-danger">
+        {{getFieldOfGroupError("numero")}}
+      </span>
+    </div>
+
+    <div class="row">
+      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
+        class="btn btn-primary text-center d-flex justify-content-center"> <img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
+    </div>
+
+  </div>
+
+
+</form>
+
+
+<!-- <code>
+    <pre>Formulario es valido: {{phoneForm.valid| json }}</pre>
+</code>
+<code>
+    <pre>Formulario Tipo Cambio: {{phoneForm.value| json }}</pre>
+</code>
+
+
+<code>
+    <pre>current Tipo Cambio: {{currentTelefono| json }}</pre>
+</code> -->

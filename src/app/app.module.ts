@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { HttpClientModule } from '@angular/common/http';
 import { CurrencyFormatPipe } from './shared/pipe/currency-format.pipe';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,7 @@ import { CurrencyFormatPipe } from './shared/pipe/currency-format.pipe';
     AppRoutingModule,
     HttpClientModule,
     SharedModule, // Es el unico modulo importado
-
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

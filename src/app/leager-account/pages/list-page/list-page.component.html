@@ -1,0 +1,132 @@
+<app-loading-spinner *ngIf="isLoading" [title]="'Cuentas Contables'"></app-loading-spinner>
+
+
+<article class="col  d-flex justify-content-center  pb-4">
+  <h2 class="h1">Lista de Cuentas Contables</h2>
+</article>
+
+
+<form
+  class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-1  row-cols-xl-3 px-4 d-flex justify-content-center align-items-center   "
+  [formGroup]="paginationForm" autocomplete="off">
+
+  <!-- BOTON AGREGAR -->
+  <div class="col p-0 mb-0 mb-md-2 mb-sm-2">
+    <div class="row me-sm-0 me-lg-4 d-flex    justify-content-center ">
+      <button class="btn btn-success  w-75 px-4 me-sm-3 fw-bold" [routerLink]="['/leager-accounts/register']">
+        <img src="assets/add.svg" alt="Icono de agregar">Crear Cuenta Contable
+      </button>
+    </div>
+  </div>
+
+
+  <section class="col d-flex justify-content-center align-self-center  mb-md-2 mb-sm-2">
+    <div class="input-group">
+      <span class="input-group-text">
+        <img src="assets/filter.svg" alt="Icono de búsqueda">
+      </span>
+      <select formControlName="codigoBanco" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un Banco --</option>
+        <option *ngFor="let bancos of bancos" [value]=bancos.codigoBanco>
+          {{bancos.nombre}}
+        </option>
+      </select>
+    </div>
+  </section>
+  <section class="col  d-flex justify-content-end    align-self-center">
+
+
+    <nav class="me-2 " aria-label="...">
+      <ul class="pagination">
+
+        <li class="page-item" (click)="onDecrease()" *ngIf="currentPagination.offset>0">
+          <span class="page-link btn">Anterior</span>
+        </li>
+        <li class="page-item disabled" *ngIf="currentPagination.offset===0">
+          <span class="page-link btn">Anterior</span>
+        </li>
+
+        <li class="page-item active " aria-current="page">
+          <span class="page-link border rounded-1">{{ currentPagination.offset + 1 }}</span>
+        </li>
+
+        <li class="page-item" (click)="onIncrease()" *ngIf="canPagination">
+          <a class="page-link btn">Siguiente</a>
+        </li>
+        <li class="page-item disabled" *ngIf="!canPagination">
+          <a class="page-link btn">Siguiente</a>
+        </li>
+      </ul>
+    </nav>
+
+    <article class="col-2    ">
+
+      <select class="form-select" formControlName="limit" aria-label="Default select example">
+        <option *ngFor="let limite of limites" [value]=limite>
+          {{limite}}
+        </option>
+      </select>
+    </article>
+
+  </section>
+
+</form>
+
+
+
+
+<section class="row px-4 py-3 ">
+  <table class=" table table-striped  table-hover   ">
+    <thead class="">
+      <tr class="text-center">
+        <th>Codigo Cuenta Contable</th>
+        <th>Codigo Banco</th>
+        <th>Codigo Moneda</th>
+        <th>Descripción</th>
+
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let leager of leagerAccounts">
+      <tr class="text-center">
+        <th scope="row">{{leager.codigoCuentaContable}}</th>
+        <td colspan="1">{{leager.codigoBanco}}</td>
+        <td colspan="1"> {{leager.codigoMoneda}}</td>
+        <td colspan="1"> {{leager.descripcion}}</td>
+        <td>
+          <button [routerLink]="['/leager-accounts', leager.codigoCuentaContable]" type="button"
+            class="btn btn-primary me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0">
+            <img src="assets/view.svg">
+          </button>
+          <button [routerLink]="['/leager-accounts/edit/', leager.codigoCuentaContable]" type="button"
+            class="btn  btn-secondary me-1 me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0">
+            <img src="assets/edit.svg">
+          </button>
+          <button type="button" class="btn btn-danger me-1 me-1 mb-0  mb-sm-2 mb-md-2 mb-lg-0  mt-lg-1"
+            (click)="onDelete(leager.codigoCuentaContable)">
+
+            <img src="assets/delete.svg">
+
+          </button>
+        </td>
+      </tr>
+
+    </tbody>
+    <tbody *ngIf="leagerAccounts.length===0 && !isLoading" class="bg-warning  ">
+      <tr>
+        <th class="table-active text-center text-info  h1" colspan="6" scope="row">Sin resultados</th>
+
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- <code>
+  <pre>Es valido: {{ paginationForm.valid| json }}</pre>
+</code>
+<code>
+  <pre>Datos: {{ paginationForm.value| json }}</pre>
+</code>
+<code>
+  <pre>current: {{ currentPagination| json }}</pre>
+</code> -->

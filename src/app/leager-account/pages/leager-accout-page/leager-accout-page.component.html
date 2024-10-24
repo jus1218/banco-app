@@ -1,0 +1,99 @@
+<app-loading-spinner *ngIf="isLoading" [title]="'Cliente'"></app-loading-spinner>
+<form class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-2 p-3  justify-content-center"
+  [formGroup]="leagerAccoutForm" autocomplete="off">
+
+
+
+  <div class="col  border rounded mt-0 mt-sm-2   p-4 c-caja">
+    <!-- TITULO -->
+    <div class="row mb-4">
+
+      <h2 class="text-center">{{title}} <span class="fw-light">Cuenta Contable</span> </h2>
+    </div>
+
+    <!-- CODIGO_CUENTA_CONTABLE -->
+    <div class="mb-3">
+      <label class="form-label">Codigo Cuenta Contable</label>
+      <input type="text" placeholder="Ingrese codigo cuenta contable" formControlName="codigoCuentaContable"
+        class="form-control">
+      <span *ngIf="isValidField('codigoCuentaContable')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoCuentaContable")}}
+      </span>
+    </div>
+    <div class="mb-3">
+      <select formControlName="codigoBanco" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione un Banco --</option>
+        <option *ngFor="let bancos of bancos" [value]=bancos.codigoBanco>
+          {{bancos.nombre}}
+        </option>
+      </select>
+      <span *ngIf="isValidField('codigoBanco')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoBanco")}}
+      </span>
+    </div>
+    <div class="mb-3">
+      <select formControlName="codigoMoneda" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="">-- Seleccione una Moneda --</option>
+        <option *ngFor="let moneda of monedas" [value]=moneda.codigoMoneda>
+          {{moneda.nombre}}
+        </option>
+      </select>
+      <span *ngIf="isValidField('codigoMoneda')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoMoneda")}}
+      </span>
+    </div>
+
+    <!-- DESCRIPCION -->
+
+    <div class="mb-3">
+      <label class="form-label">Descripcion</label>
+      <textarea type="text" placeholder="Ingrese una descripción" formControlName="descripcion" class="form-control"
+        rows="2" cols="50" style=" max-height: 200px;"></textarea>
+      <span *ngIf="isValidField('descripcion')" class="form-text text-danger">
+        {{getFieldOfGroupError("descripcion")}}
+      </span>
+    </div>
+
+    <!-- SALDO -->
+    <div class="mb-3">
+      <label class="form-label">Saldo</label>
+      <input type="text" placeholder="" formControlName="saldo" class="form-control">
+      <span *ngIf="isValidField('saldo')" class="form-text text-danger">
+        {{getFieldOfGroupError("saldo")}}
+      </span>
+    </div>
+
+    <div class="mb-3">
+      <select formControlName="codigoTipoCuentaContable" class="form-select" aria-label="Default select example">
+        <option selected class="text-center" value="0">-- Seleccione un tipo de cuenta contable --</option>
+        <option *ngFor="let tipoCuentaContable of tiposCuentaContable"
+          [value]=tipoCuentaContable.codigoTipoCuentaContable>
+          {{tipoCuentaContable.nombre}}
+        </option>
+      </select>
+      <span *ngIf="isValidField('codigoTipoCuentaContable')" class="form-text text-danger">
+        {{getFieldOfGroupError("codigoTipoCuentaContable")}}
+      </span>
+    </div>
+
+    <div class="row">
+      <button type="submit" *ngIf="title!=='Información'" (click)="onSubmit()"
+        class="btn btn-primary text-center d-flex justify-content-center"> <img
+          [src]="title ==='Agregar' ? 'assets/add.svg' : 'assets/edit.svg'" width="24px" height="24px"
+          class="me-1">{{title}}</button>
+    </div>
+
+  </div>
+</form>
+
+
+<!-- <code>
+    <pre>Formulario es valido: {{leagerAccoutForm.valid| json }}</pre>
+</code>
+<code>
+    <pre>Formulario Tipo Cambio: {{leagerAccoutForm.value| json }}</pre>
+</code>
+
+<code>
+    <pre>current Tipo Cambio: {{currentLeagerAccount | json }}</pre>
+</code> -->

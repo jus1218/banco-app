@@ -1,0 +1,56 @@
+<form class="row row-cols-1  row-cols-sm-1 row-cols-md-1  row-cols-lg-1  row-cols-xl-3 px-4 "
+  [formGroup]="paginationForm" autocomplete="off">
+
+  <!-- px-4 -->
+
+  <div class="col  p-0 mb-md-2 mb-sm-2 ">
+    <button class="btn btn-success btn-lg px-4 me-sm-3 fw-bold" [routerLink]="['/provinces/register' ]">
+      Crear Provincia
+    </button>
+
+  </div>
+
+  <div class="col d-flex justify-content-center  mb-md-2 mb-sm-2">
+
+    <input type="text" placeholder="Ingrese el nombre de la provincia" formControlName="nombre"
+      class="form-control text-center" (keydown.enter)="onSearch($event)">
+
+  </div>
+  <div class="col  d-flex justify-content-end">
+
+
+    <nav class="me-2" aria-label="...">
+      <ul class="pagination">
+
+        <li class="page-item" (click)="onDecrease()" *ngIf="currentPagination.offset>0">
+          <span class="page-link btn">Anterior</span>
+        </li>
+        <li class="page-item disabled" *ngIf="currentPagination.offset===0">
+          <span class="page-link btn">Anterior</span>
+        </li>
+
+        <li class="page-item active" aria-current="page">
+          <span class="page-link">{{ currentPagination.offset + 1 }}</span>
+        </li>
+
+        <li class="page-item" (click)="onIncrease()" *ngIf="canPagination">
+          <a class="page-link btn">Siguiente</a>
+        </li>
+        <li class="page-item disabled" *ngIf="!canPagination">
+          <a class="page-link btn">Siguiente</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="col-2    ">
+
+      <select class="form-select" formControlName="limit" aria-label="Default select example">
+        <option *ngFor="let limite of limites" [value]=limite>
+          {{limite}}
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+</form>

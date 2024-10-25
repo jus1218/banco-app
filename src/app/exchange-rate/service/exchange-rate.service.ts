@@ -27,7 +27,7 @@ export class ExchangeRateService {
 
     const url = `${this.baseUrl}/delete?codigoMoneda=${codigoMoneda}&fecha=${fecha}&codigoBanco=${codigoBanco}`;
     return this.http.delete<CommonResponse<String>>(url).pipe(
-      tap(res => console.log(res)),
+
       catchError(err => this.helperService.catchErrorP<String>(err.error.detail))
     );
   }
@@ -45,8 +45,6 @@ export class ExchangeRateService {
 
     return this.http.get<CommonResponse<ExchangeRate>>(url)
       .pipe(
-        tap(res => console.log('Tipo de cambio:')),
-        tap(res => console.log(res)),
         catchError(err => this.helperService.catchErrorP<ExchangeRate>(err.error.detail))
       );
   }

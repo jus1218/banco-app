@@ -4,11 +4,12 @@ import { Bank } from '../../interfaces/bank.interface';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginationService } from '../../../shared/service/pagination.service';
 import { Router } from '@angular/router';
-import { catchError, of } from 'rxjs';
+import { catchError, filter, of } from 'rxjs';
 import { Message } from '../../../shared/interfaces/message.interface';
 import { RouterService } from '../../../shared/service/router.service';
 import { Ruta } from '../../../shared/interfaces/ultima-ruta.interface';
 import { MessageManagerService } from '../../../shared/service/message-manager.service';
+import { DEFAULT_OFFSET } from '../../../shared/constants/constants';
 const OFFSET: string = 'offset';
 const LIMIT: string = 'limit';
 @Component({
@@ -36,6 +37,7 @@ export class ListPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBanks();
+    this.onChangeLimit();
 
   }
 
@@ -47,7 +49,9 @@ export class ListPageComponent implements OnInit {
     })
 
   }
-
+  get limites(): number[] {
+    return [5, 8, 10]
+  }
   get currentPagination() {
     const form = this.paginationForm;
     return {
@@ -90,6 +94,18 @@ export class ListPageComponent implements OnInit {
   }
 
 
+  onChangeLimit(): void {
 
+    this.paginationForm.get(LIMIT)?.valueChanges
+      .pipe(filter(value => {
+        // if (!value) return false;
+        this.paginationForm.get(OFFSET)?.setValue(DEFAULT_OFFSET)
+        return value
+      }))
+      .subscribe(() => {
+        this.loadBanks();
+      })
+
+  }
 
 }

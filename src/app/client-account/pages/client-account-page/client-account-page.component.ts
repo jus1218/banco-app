@@ -95,6 +95,7 @@ export class ClientAccountPageComponent implements OnInit {
     this.clients = data.clientes;
     this.cuentasContables = data.cuentaContables;
 
+
     this.isLoading = false;
   }
 
@@ -111,7 +112,15 @@ export class ClientAccountPageComponent implements OnInit {
           return this.selectorService.getAll();
         })
       )
-      .subscribe(res => this.handleResponseDataSelector(res))
+      .subscribe(res => {
+        this.handleResponseDataSelector(res);
+        this.handleLeagerAccount();
+        // this.cuentasContables =
+      });
+
+  }
+  handleLeagerAccount(): void {
+    this.cuentasContables = this.selectorService.cuentasContables.filter(c => c.codigoBanco === this.currentClientAccount.codigoBanco)
 
   }
 
@@ -146,7 +155,8 @@ export class ClientAccountPageComponent implements OnInit {
           this.clientAccountForm.get('codigoMoneda')?.setValue(this.currencies[0].codigoMoneda)
         })
       )
-      .subscribe((codigoBanco) => this.cuentasContables = this.selectorService.cuentasContables.filter(c => c.codigoBanco === codigoBanco))
+      .subscribe((codigoBanco) => this.handleLeagerAccount())
+    // .subscribe((codigoBanco) => this.cuentasContables = this.selectorService.cuentasContables.filter(c => c.codigoBanco === codigoBanco))
 
   }
 

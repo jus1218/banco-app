@@ -76,7 +76,6 @@ export class LeagerAccoutPageComponent implements OnInit {
 
     this.activatedRoute.params
       .pipe(
-        tap(value => console.log(value)),
         switchMap(({ codigo }) => this.leagerAccountsService.getLeagerAccount(Number(codigo))),
         switchMap(res => {
           this.handleResponseLeagerAccount(res);

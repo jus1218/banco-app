@@ -140,7 +140,6 @@ export class UbicationService implements OnInit {
     const url: string = `${this.baseUrl}/ubicacion`;
 
     return this.http.get<r<Provincia[]>>(url).pipe(
-      tap(response => console.log('Provincias:', response)),
 
       map(res => res.value),);
 

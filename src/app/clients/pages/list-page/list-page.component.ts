@@ -5,10 +5,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginationService } from '../../../shared/service/pagination.service';
 import { ClientService } from '../../services/client.service';
 import { Client, CommonResponse } from '../../interface/client.interface';
-import { of, switchMap } from 'rxjs';
+import { filter, of, switchMap } from 'rxjs';
 import { RouterService } from '../../../shared/service/router.service';
 import { MessageManagerService } from '../../../shared/service/message-manager.service';
-import { Pagination } from '../../../shared/constants/constants';
+import { DEFAULT_OFFSET, Pagination } from '../../../shared/constants/constants';
 
 @Component({
   selector: 'app-list-page',
@@ -50,6 +50,7 @@ export class ListPageComponent implements OnInit {
   ngOnInit(): void {
 
     this.loadClients();
+    this.onChangeLimit();
   }
 
   loadClients(): void {
@@ -73,7 +74,9 @@ export class ListPageComponent implements OnInit {
     this.loadClients();
   }
 
-
+  get limites(): number[] {
+    return [5, 8, 10]
+  }
 
   get currentPagination() {
     const form = this.PaginationForm;
@@ -107,7 +110,19 @@ export class ListPageComponent implements OnInit {
 
       ).subscribe((res) => this.managerResponse(res));
   }
+  onChangeLimit(): void {
 
+    this.PaginationForm.get('limit')?.valueChanges
+      .pipe(filter(value => {
+        // if (!value) return false;
+        this.PaginationForm.get('offset')?.setValue(DEFAULT_OFFSET)
+        return value
+      }))
+      .subscribe(() => {
+        this.loadClients();
+      })
+
+  }
 
   managerResponse({ message, success: isSuccess, value: banks }: CommonResponse<Client[]>) {
     if (!isSuccess) {

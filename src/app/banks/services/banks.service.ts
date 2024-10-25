@@ -32,22 +32,7 @@ export class BanksService {
 
 
   }
-  // getBancos(offset: number, limit: number, nombre: string | null): Observable<Bank[]> {
-  //   const name: string = nombre ?? '';
-  //   let params = new HttpParams()
-  //     .set('offset', offset)
-  //     .set('limit', limit)
-  //     .set('nombre', name);
 
-  //   return this.http.get<CommonResponse<Bank[]>>(`${this.baseUrl}`, { params })
-  //     .pipe(
-  //       tap(response => console.log('Datos recibidos:', response)),
-  //       map(res => res.value!),
-  //       tap(banks => console.log(banks),
-  //       )
-  //     )
-
-  // }
 
 
 
@@ -73,22 +58,13 @@ export class BanksService {
       catchError(err => this.helperService.catchErrorP2<BankInfo>(err))
     );
   }
-  // getBanco(id: string): Observable<BankInfo | null> {
 
-  //   const url: string = `${this.baseUrl}/search/${id}`;
-
-  //   return this.http.get<CommonResponseV<BankInfo | null>>(url).pipe(
-  //     // tap(response => console.log('Datos recibidos:', response)),
-  //     map(res => res.value),);
-  // }
 
   getPhonesByCodeBank(codigoBanco: string): Observable<CommonResponseV<Telefono[]>> {
     const url: string = `${this.baseUrl}/phones/${codigoBanco}`;
 
     return this.http.get<CommonResponseV<Telefono[]>>(url).pipe(
-      // tap(response => console.log('Datos recibidos:', response)),
-      // timeout(4000), // Retrasa la ejecución 2 segundos
-      // map(res => res),
+
       catchError((error) => {
         const message: CommonResponseV<Telefono[]> = {
           value: [],

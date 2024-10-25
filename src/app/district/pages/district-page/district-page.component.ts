@@ -68,7 +68,7 @@ export class DistrictPageComponent implements OnInit {
         switchMap(({ codigo }) => this.districtService
           .getUbication({ codigo: Number(codigo), type: TypeUbication.District }))
       ).subscribe(({ message, success: isSuccess, value }) => {
-        console.log(value);
+
 
         if (!isSuccess) {
           this.messageManagerService.simpleBox({ message, success: isSuccess })

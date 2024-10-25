@@ -58,7 +58,6 @@ export class TelefonoService {
 
     return this.http.get<CommonResponse<Telefono[]>>(`${this.baseUrl}/client/${id}`)
       .pipe(
-        tap(res => console.log(res)),
         catchError(err => this.catchErrorP(err.error.detail))
       );
   }

@@ -73,32 +73,41 @@
     </div>
 
   </section>
+  <section class="row  row-cols-1    p-4">
 
+    <div class="col d-flex justify-content-center">
+      <nav class="d-flex justify-content-end" aria-label="...">
+        <ul class="pagination">
+          <li class="page-item" *ngIf="currentPagination.offset>0">
+            <span class="page-link btn" (click)="decrease()">Anterior</span>
+          </li>
+          <li class="page-item disabled" *ngIf="currentPagination.offset===0">
+            <span class="page-link btn">Anterior</span>
+          </li>
+
+          <li class="page-item active" aria-current="page">
+            <span class="page-link">{{ currentPagination.offset + 1 }}</span>
+          </li>
+
+          <li class="page-item" *ngIf="canPagination">
+            <a class="page-link btn" (click)="increase()">Siguiente</a>
+          </li>
+          <li class="page-item disabled" *ngIf="!canPagination">
+            <a class="page-link btn">Siguiente</a>
+          </li>
+        </ul>
+        <select class="form-select w-25 ms-1" formControlName="limit" aria-label="Default select example">
+          <option *ngFor="let limite of limites" [value]=limite>
+            {{limite}}
+          </option>
+        </select>
+      </nav>
+    </div>
+
+
+  </section>
 </form>
-<section class="row  ">
-  <nav class="d-flex justify-content-center p-4" aria-label="...">
-    <ul class="pagination">
-      <li class="page-item" *ngIf="currentPagination.offset>0">
-        <span class="page-link btn" (click)="decrease()">Anterior</span>
-      </li>
-      <li class="page-item disabled" *ngIf="currentPagination.offset===0">
-        <span class="page-link btn">Anterior</span>
-      </li>
 
-      <li class="page-item active" aria-current="page">
-        <span class="page-link">{{ currentPagination.offset + 1 }}</span>
-      </li>
-
-      <li class="page-item" *ngIf="canPagination">
-        <a class="page-link btn" (click)="increase()">Siguiente</a>
-      </li>
-      <li class="page-item disabled" *ngIf="!canPagination">
-        <a class="page-link btn">Siguiente</a>
-      </li>
-    </ul>
-  </nav>
-
-</section>
 
 
 
@@ -158,8 +167,6 @@
     </tbody>
   </table>
 </section>
-
-
 
 
 

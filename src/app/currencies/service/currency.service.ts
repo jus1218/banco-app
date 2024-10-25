@@ -21,7 +21,7 @@ export class CurrencyService {
 
     return this.http.post<CommonResponse<Currency>>(`${this.baseUrl}/create`, currency)
       .pipe(
-        catchError(err => this.catchErrorP<Currency>(err.error.detail))
+        catchError(err => this.helperService.catchErrorP2<Currency>(err))
       );
   }
   updateCurrency(currency: Currency): Observable<CommonResponse<Currency>> {
@@ -29,7 +29,7 @@ export class CurrencyService {
 
     return this.http.patch<CommonResponse<Currency>>(`${this.baseUrl}/${currency.codigoMoneda}`, currency)
       .pipe(
-        catchError(err => this.catchErrorP<Currency>(err.error.detail))
+        catchError(err => this.helperService.catchErrorP2<Currency>(err))
       );
   }
 
@@ -40,7 +40,7 @@ export class CurrencyService {
 
     return this.http.get<CommonResponse<Currency>>(`${this.baseUrl}/${codigoMoneda}`)
       .pipe(
-        catchError(err => this.catchErrorP<Currency>(err.error.detail))
+        catchError(err => this.helperService.catchErrorP2<Currency>(err))
       );
 
   }
@@ -54,7 +54,7 @@ export class CurrencyService {
       .set('nombre', name);
     return this.http.get<CommonResponse<Currency[]>>(`${this.baseUrl}`, { params })
       .pipe(
-        catchError(err => this.catchErrorP<Currency[]>(err.error.detail))
+        catchError(err => this.helperService.catchErrorP2<Currency[]>(err))
       );
   }
   deleteCurrency(id: string): Observable<CommonResponse<Currency>> {

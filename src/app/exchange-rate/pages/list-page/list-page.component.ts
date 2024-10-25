@@ -7,13 +7,14 @@ import { RouterService } from '../../../shared/service/router.service';
 import { ExchangeRateService } from '../../service/exchange-rate.service';
 import { BanksService } from '../../../banks/services/banks.service';
 import { Bank } from '../../../banks/interfaces/bank.interface';
-import { of, switchMap, tap } from 'rxjs';
+import { filter, of, switchMap, tap } from 'rxjs';
 import { CurrencyService } from '../../../currencies/service/currency.service';
 import { Currency } from '../../../currencies/interface/currency.interface';
 import { HelperService } from '../../../shared/service/helper.service';
 import { MessageManagerService } from '../../../shared/service/message-manager.service';
 import { CommonResponse } from '../../../clients/interface/client.interface';
 import { BancoSelector, Selector, SelectorService } from '../../../shared/service/selector.service';
+import { DEFAULT_OFFSET } from '../../../shared/constants/constants';
 
 @Component({
   selector: 'app-list-page',
@@ -60,6 +61,7 @@ export class ListPageComponent implements OnInit {
   }
   ngOnInit(): void {
     this.loadExchangeRates();
+    this.onChangeLimit();
   }
 
   loadExchangeRates(): void {
@@ -101,7 +103,9 @@ export class ListPageComponent implements OnInit {
     this.loadExchangeRates();
   }
 
-
+  get limites(): number[] {
+    return [5, 8, 10]
+  }
   get currentPagination(): PaginationExchangeRate {
 
     const form = this.paginationForm;
@@ -128,6 +132,20 @@ export class ListPageComponent implements OnInit {
   decrease() {
     this.paginationForm.get('offset')?.setValue(this.currentPagination.offset - 1);
     this.loadExchangeRates();
+  }
+
+  onChangeLimit(): void {
+
+    this.paginationForm.get('limit')?.valueChanges
+      .pipe(filter(value => {
+        // if (!value) return false;
+        this.paginationForm.get('offset')?.setValue(DEFAULT_OFFSET)
+        return value
+      }))
+      .subscribe(() => {
+        this.loadExchangeRates();
+      })
+
   }
 
 

@@ -31,7 +31,7 @@ export class SelectorService {
         this.currenciesBase = value!.monedas;
         this.cuentasContablesBase = value!.cuentaContables;
       }),
-      catchError(err => this.helperService.catchErrorP<Selector>(err.error.detail))
+      catchError(err => this.helperService.catchErrorP2<Selector>(err))
     );
   }
 
